@@ -100,6 +100,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setErrorMessage(null);
 
     const cleanEmail = email.trim();
@@ -121,7 +122,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     try {
       if (mode === 'forgot') {
         await sendPasswordReset(cleanEmail);
-        setLoading(false);
         setSuccessMessage(`Password recovery link sent to ${cleanEmail}. Please check your inbox.`);
         return;
       }
@@ -133,34 +133,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         firebaseUser = await signInWithEmail(cleanEmail, cleanPassword);
       }
 
-      // Fetch user's actual document from Firestore
-      let existingDoc = null;
-      try {
-        existingDoc = await fetchUserProfileFromFirestore(firebaseUser.uid);
-      } catch (firestoreErr) {
-        console.warn('Firestore sync note:', firestoreErr);
-      }
-
-      // Build strictly actual user profile (pure user data, zero guest data)
-      const targetProfile = buildActualUserProfile(
-        firebaseUser,
-        existingDoc,
-        cleanName || undefined
-      );
-
-      // Persist actual user profile to Firestore
-      await saveUserProfileToFirestore(firebaseUser.uid, targetProfile);
-
-      // Save locally to user-specific storage and update app state
+      // 1. Immediately create local user profile and authenticate UI
+      const initialProfile = buildActualUserProfile(firebaseUser, null, cleanName || undefined);
       storageService.setActiveUser(firebaseUser.uid);
-      storageService.saveProfile(targetProfile, false);
-      onSaveProfile(targetProfile);
+      storageService.saveProfile(initialProfile, false);
+      onSaveProfile(initialProfile);
 
-      // Automatically detect and apply location on login
-      autoDetectAndApplyLocation(targetProfile, onSaveProfile).catch((err) => {
-        console.info('[AuthModal] Auto location detection for user notice:', err);
-      });
-
+      // 2. Immediately stop loading spinner and show success
       setLoading(false);
       setSuccessMessage(
         mode === 'signup'
@@ -168,55 +147,96 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           : 'Welcome back! Signed in successfully.'
       );
 
+      // 3. Immediately schedule closing modal
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
-      }, 1200);
+      }, 800);
+
+      // 4. Safely perform Firestore profile sync and location detection in background (non-blocking)
+      (async () => {
+        try {
+          const existingDoc = await fetchUserProfileFromFirestore(firebaseUser.uid).catch((e) => {
+            console.warn('[AuthModal] Background Firestore fetch note:', e);
+            return null;
+          });
+
+          const targetProfile = buildActualUserProfile(
+            firebaseUser,
+            existingDoc,
+            cleanName || undefined
+          );
+
+          storageService.saveProfile(targetProfile, false);
+          onSaveProfile(targetProfile);
+
+          saveUserProfileToFirestore(firebaseUser.uid, targetProfile).catch((err) => {
+            console.warn('[AuthModal] Background Firestore save note:', err);
+          });
+
+          autoDetectAndApplyLocation(targetProfile, onSaveProfile).catch((err) => {
+            console.info('[AuthModal] Auto location detection notice:', err);
+          });
+        } catch (bgErr) {
+          console.warn('[AuthModal] Post-auth background sync issue:', bgErr);
+        }
+      })();
     } catch (err: any) {
-      setLoading(false);
       setErrorMessage(formatFirebaseError(err));
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    if (loading) return;
     setErrorMessage(null);
     setLoading(true);
 
     try {
       const firebaseUser = await signInWithGoogle();
 
-      // Fetch user's actual document from Firestore
-      let existingDoc = null;
-      try {
-        existingDoc = await fetchUserProfileFromFirestore(firebaseUser.uid);
-      } catch (firestoreErr) {
-        console.warn('Firestore sync note:', firestoreErr);
-      }
-
-      // Build strictly actual user profile (pure user data, zero guest data)
-      const targetProfile = buildActualUserProfile(firebaseUser, existingDoc);
-
-      // Persist actual user profile to Firestore
-      await saveUserProfileToFirestore(firebaseUser.uid, targetProfile);
-
-      // Save locally to user-specific storage and update app state
+      // 1. Immediately create local user profile and authenticate UI
+      const initialProfile = buildActualUserProfile(firebaseUser, null);
       storageService.setActiveUser(firebaseUser.uid);
-      storageService.saveProfile(targetProfile, false);
-      onSaveProfile(targetProfile);
+      storageService.saveProfile(initialProfile, false);
+      onSaveProfile(initialProfile);
 
-      // Automatically detect and apply location on Google sign-in
-      autoDetectAndApplyLocation(targetProfile, onSaveProfile).catch((err) => {
-        console.info('[AuthModal] Auto location detection for Google user notice:', err);
-      });
-
+      // 2. Immediately stop loading spinner and show success
       setLoading(false);
       setSuccessMessage('Signed in with Google! Welcome to Noor.');
+
+      // 3. Immediately schedule closing modal
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
-      }, 1000);
+      }, 800);
+
+      // 4. Safely perform Firestore profile sync and location detection in background (non-blocking)
+      (async () => {
+        try {
+          const existingDoc = await fetchUserProfileFromFirestore(firebaseUser.uid).catch((e) => {
+            console.warn('[AuthModal] Background Google Firestore fetch note:', e);
+            return null;
+          });
+
+          const targetProfile = buildActualUserProfile(firebaseUser, existingDoc);
+
+          storageService.saveProfile(targetProfile, false);
+          onSaveProfile(targetProfile);
+
+          saveUserProfileToFirestore(firebaseUser.uid, targetProfile).catch((err) => {
+            console.warn('[AuthModal] Background Google Firestore save note:', err);
+          });
+
+          autoDetectAndApplyLocation(targetProfile, onSaveProfile).catch((err) => {
+            console.info('[AuthModal] Auto location detection for Google user notice:', err);
+          });
+        } catch (bgErr) {
+          console.warn('[AuthModal] Post-auth Google background sync issue:', bgErr);
+        }
+      })();
     } catch (err: any) {
-      setLoading(false);
       const isUnauthorized =
         err?.code === 'auth/unauthorized-domain' ||
         err?.message?.includes('unauthorized-domain');
@@ -228,6 +248,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       } else {
         setErrorMessage(formatFirebaseError(err));
       }
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -151,8 +151,14 @@ export default function App() {
       if (firebaseUser) {
         storageService.setActiveUser(firebaseUser.uid);
         try {
-          // Fetch existing profile document from Firestore
-          const cloudData = await fetchUserProfileFromFirestore(firebaseUser.uid);
+          // Fetch existing profile document from Firestore (safely timed out)
+          const cloudData = await Promise.race([
+            fetchUserProfileFromFirestore(firebaseUser.uid),
+            new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+          ]).catch((err) => {
+            console.warn('[App AuthState] Firestore fetch timeout/error:', err);
+            return null;
+          });
 
           // Build actual user profile (pure actual user data, zero guest data)
           const actualProfile = buildActualUserProfile(firebaseUser, cloudData);

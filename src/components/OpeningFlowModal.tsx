@@ -94,6 +94,7 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setErrorMsg(null);
 
     const cleanEmail = email.trim();
@@ -119,37 +120,45 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
         firebaseUser = await signInWithEmail(cleanEmail, cleanPassword);
       }
 
-      // Fetch user's actual document from Firestore
-      let cloudDoc = null;
-      try {
-        cloudDoc = await fetchUserProfileFromFirestore(firebaseUser.uid);
-      } catch (cloudErr) {
-        console.warn('Cloud sync note:', cloudErr);
-      }
-
-      // Build strictly actual user profile (zero guest data)
-      const targetProfile = buildActualUserProfile(firebaseUser, cloudDoc, cleanName || undefined);
-
-      // Persist actual user profile to Firestore
-      await saveUserProfileToFirestore(firebaseUser.uid, targetProfile);
-
-      // Save locally to user storage and update app state
+      // 1. Immediately create local user profile and authenticate UI
+      const initialProfile = buildActualUserProfile(firebaseUser, null, cleanName || undefined);
       storageService.setActiveUser(firebaseUser.uid);
-      storageService.saveProfile(targetProfile, false);
-      onSaveProfile(targetProfile);
+      storageService.saveProfile(initialProfile, false);
+      onSaveProfile(initialProfile);
 
-      // Automatically detect and apply location upon account creation/login
-      autoDetectAndApplyLocation(targetProfile, onSaveProfile).catch((err) => {
-        console.info('[OpeningFlow] Auto location detection for user notice:', err);
-      });
-
+      // 2. Immediately stop loading spinner and show success
       setLoading(false);
       setSuccessMsg(authMode === 'signup' ? 'Account created! Welcome to Noor.' : 'Signed in successfully! Welcome back.');
+
+      // 3. Schedule closing opening flow
       setTimeout(() => {
         onFinish();
-      }, 1000);
+      }, 800);
+
+      // 4. Safely perform Firestore profile sync and location detection in background (non-blocking)
+      (async () => {
+        try {
+          const cloudDoc = await fetchUserProfileFromFirestore(firebaseUser.uid).catch((e) => {
+            console.warn('[OpeningFlow] Background Firestore fetch note:', e);
+            return null;
+          });
+
+          const targetProfile = buildActualUserProfile(firebaseUser, cloudDoc, cleanName || undefined);
+          storageService.saveProfile(targetProfile, false);
+          onSaveProfile(targetProfile);
+
+          saveUserProfileToFirestore(firebaseUser.uid, targetProfile).catch((err) => {
+            console.warn('[OpeningFlow] Background Firestore save note:', err);
+          });
+
+          autoDetectAndApplyLocation(targetProfile, onSaveProfile).catch((err) => {
+            console.info('[OpeningFlow] Auto location detection notice:', err);
+          });
+        } catch (bgErr) {
+          console.warn('[OpeningFlow] Post-auth background sync issue:', bgErr);
+        }
+      })();
     } catch (err: any) {
-      setLoading(false);
       const code = err?.code || '';
       if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
         setErrorMsg('Invalid email or password. If you are new, please select "Create Account" above.');
@@ -162,46 +171,57 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
       } else {
         setErrorMsg(err?.message || 'Authentication error. You may also continue in Guest Mode.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleAuth = async () => {
+    if (loading) return;
     setErrorMsg(null);
     setLoading(true);
     try {
       const firebaseUser = await signInWithGoogle();
 
-      // Fetch user's actual document from Firestore
-      let cloudDoc = null;
-      try {
-        cloudDoc = await fetchUserProfileFromFirestore(firebaseUser.uid);
-      } catch (cloudErr) {
-        console.warn('Cloud sync note:', cloudErr);
-      }
-
-      // Build strictly actual user profile (zero guest data)
-      const targetProfile = buildActualUserProfile(firebaseUser, cloudDoc);
-
-      // Persist actual user profile to Firestore
-      await saveUserProfileToFirestore(firebaseUser.uid, targetProfile);
-
-      // Save locally to user storage and update app state
+      // 1. Immediately create local user profile and authenticate UI
+      const initialProfile = buildActualUserProfile(firebaseUser, null);
       storageService.setActiveUser(firebaseUser.uid);
-      storageService.saveProfile(targetProfile, false);
-      onSaveProfile(targetProfile);
+      storageService.saveProfile(initialProfile, false);
+      onSaveProfile(initialProfile);
 
-      // Automatically detect and apply location upon Google sign-in
-      autoDetectAndApplyLocation(targetProfile, onSaveProfile).catch((err) => {
-        console.info('[OpeningFlow] Auto location detection for Google login notice:', err);
-      });
-
+      // 2. Immediately stop loading spinner and show success
       setLoading(false);
       setSuccessMsg('Signed in with Google! Welcome to Noor.');
+
+      // 3. Schedule closing opening flow
       setTimeout(() => {
         onFinish();
-      }, 900);
+      }, 800);
+
+      // 4. Safely perform Firestore profile sync and location detection in background (non-blocking)
+      (async () => {
+        try {
+          const cloudDoc = await fetchUserProfileFromFirestore(firebaseUser.uid).catch((e) => {
+            console.warn('[OpeningFlow] Background Google Firestore fetch note:', e);
+            return null;
+          });
+
+          const targetProfile = buildActualUserProfile(firebaseUser, cloudDoc);
+          storageService.saveProfile(targetProfile, false);
+          onSaveProfile(targetProfile);
+
+          saveUserProfileToFirestore(firebaseUser.uid, targetProfile).catch((err) => {
+            console.warn('[OpeningFlow] Background Google Firestore save note:', err);
+          });
+
+          autoDetectAndApplyLocation(targetProfile, onSaveProfile).catch((err) => {
+            console.info('[OpeningFlow] Auto location detection for Google login notice:', err);
+          });
+        } catch (bgErr) {
+          console.warn('[OpeningFlow] Post-auth Google background sync issue:', bgErr);
+        }
+      })();
     } catch (err: any) {
-      setLoading(false);
       const isUnauthorized =
         err?.code === 'auth/unauthorized-domain' ||
         err?.message?.includes('unauthorized-domain');
@@ -217,6 +237,8 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
           setErrorMsg(err?.message || 'Google sign-in could not complete. Please try again or use email.');
         }
       }
+    } finally {
+      setLoading(false);
     }
   };
 

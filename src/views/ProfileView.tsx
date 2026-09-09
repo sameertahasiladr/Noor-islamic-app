@@ -1,36 +1,24 @@
 import React, { useState } from 'react';
 import {
-  User,
   Bookmark,
   Award,
   Clock,
   Sparkles,
   BookOpen,
-  Settings,
   LogIn,
   LogOut,
   Check,
   ChevronRight,
-  Moon,
-  Sun,
   Trash2,
   MapPin,
-  Database,
-  RefreshCw,
   ShieldCheck,
   Edit2,
-  Save,
-  RotateCcw,
 } from 'lucide-react';
-import { AppTab, QuranBookmark, UserProfile } from '../types';
+import { AppTab, UserProfile } from '../types';
 import { storageService } from '../services/storageService';
 import { autoDetectAndApplyLocation } from '../services/locationService';
 import {
-  auth,
   logOutUser,
-  saveUserProfileToFirestore,
-  fetchUserProfileFromFirestore,
-  buildActualUserProfile,
 } from '../services/firebase';
 
 interface ProfileViewProps {
@@ -45,16 +33,12 @@ interface ProfileViewProps {
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
   profile,
-  isDark,
-  onToggleTheme,
   onOpenAuthModal,
   onUpdateProfile,
   onNavigateTab,
   onSelectSurah,
 }) => {
-  const [activeTab, setActiveTab] = useState<'bookmarks' | 'progress' | 'settings'>('bookmarks');
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [syncSuccess, setSyncSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState<'bookmarks' | 'progress'>('bookmarks');
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(profile.name);
   const [cloudMsg, setCloudMsg] = useState<string | null>(null);
@@ -94,49 +78,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     setIsEditingName(false);
     setCloudMsg('Name updated & synced!');
     setTimeout(() => setCloudMsg(null), 2500);
-  };
-
-  const handleResetCleanAccount = async () => {
-    if (profile.isGuest || !profile.id || profile.id === 'guest_default') return;
-    const confirmed = window.confirm(
-      'Reset account data to clean state? This removes any old guest test data from your account.'
-    );
-    if (!confirmed) return;
-
-    setIsSyncing(true);
-    try {
-      const currentUser = auth.currentUser;
-      if (currentUser) {
-        const fresh = buildActualUserProfile(currentUser, null);
-        await saveUserProfileToFirestore(currentUser.uid, fresh);
-        storageService.saveProfile(fresh, false);
-        onUpdateProfile(fresh);
-        setCloudMsg('Account data reset to clean profile.');
-        setTimeout(() => setCloudMsg(null), 3000);
-      }
-    } catch (e) {
-      console.error('Reset failed:', e);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  const handleManualSync = async () => {
-    if (profile.isGuest || !profile.id || profile.id === 'guest_default') {
-      onOpenAuthModal();
-      return;
-    }
-    setIsSyncing(true);
-    setSyncSuccess(false);
-    try {
-      await saveUserProfileToFirestore(profile.id, profile);
-      setSyncSuccess(true);
-      setTimeout(() => setSyncSuccess(false), 2500);
-    } catch (e) {
-      console.error('Manual sync failed:', e);
-    } finally {
-      setIsSyncing(false);
-    }
   };
 
   const totalMissedPrayers = Object.values(profile.qadaPrayers || {}).reduce((a: number, b: number) => a + b, 0);
@@ -278,16 +219,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         >
           My Spiritual Journey
         </button>
-        <button
-          onClick={() => setActiveTab('settings')}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
-            activeTab === 'settings'
-              ? 'bg-white dark:bg-zinc-900 text-emerald-800 dark:text-emerald-400 shadow-sm'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900'
-          }`}
-        >
-          Preferences
-        </button>
       </div>
 
       {/* VIEW 1: BOOKMARKS */}
@@ -410,132 +341,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
             <p className="text-xs text-zinc-500">
               Last read: Surah {profile.quranProgress.lastReadSurah}, Ayah {profile.quranProgress.lastReadAyah}. Regularly reciting the Quran illuminates the grave and heart.
             </p>
-          </div>
-        </div>
-      )}
-
-      {/* VIEW 3: SETTINGS */}
-      {activeTab === 'settings' && (
-        <div className="space-y-4">
-          {/* Appearance Settings */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 shadow-sm space-y-3">
-            <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-              Appearance & Font
-            </h3>
-
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-700 dark:text-zinc-300">
-                Dark Mode (Deep Emerald & Night Canvas)
-              </span>
-              <button
-                onClick={onToggleTheme}
-                className="p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300"
-              >
-                {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-emerald-800" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Data Backup & Cloud Sync */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
-                  <Database className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                    Firebase Firestore Database
-                  </h3>
-                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                    {profile.isGuest
-                      ? 'Local storage mode • Cloud backup inactive'
-                      : 'Real-time synchronization active'}
-                  </p>
-                </div>
-              </div>
-
-              {!profile.isGuest && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Synced
-                </span>
-              )}
-            </div>
-
-            <div className="text-xs text-zinc-600 dark:text-zinc-400 space-y-1.5 leading-relaxed bg-zinc-50 dark:bg-zinc-900 p-3.5 rounded-xl border border-zinc-200/60 dark:border-zinc-800">
-              <div className="flex justify-between py-1 border-b border-zinc-200/40 dark:border-zinc-800">
-                <span className="text-zinc-500">Database Engine:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">Google Cloud Firestore</span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-zinc-200/40 dark:border-zinc-800">
-                <span className="text-zinc-500">Authentication:</span>
-                <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                  {profile.isGuest ? 'Guest (Local Only)' : 'Firebase Auth (Verified)'}
-                </span>
-              </div>
-              <div className="flex justify-between py-1 border-b border-zinc-200/40 dark:border-zinc-800">
-                <span className="text-zinc-500">Active Account ID:</span>
-                <span className="font-mono text-[11px] text-zinc-700 dark:text-zinc-300 truncate max-w-[180px]">
-                  {profile.id}
-                </span>
-              </div>
-              <div className="flex justify-between py-1">
-                <span className="text-zinc-500">Synchronized Items:</span>
-                <span className="font-semibold text-emerald-700 dark:text-emerald-400">
-                  Bookmarks, Dhikr, Qada, Settings
-                </span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 pt-1">
-              {profile.isGuest ? (
-                <button
-                  type="button"
-                  onClick={onOpenAuthModal}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span>Sign In with Google to Activate Database Backup</span>
-                </button>
-              ) : (
-                <div className="flex flex-col sm:flex-row gap-2 w-full">
-                  <button
-                    type="button"
-                    onClick={handleManualSync}
-                    disabled={isSyncing}
-                    className="flex-1 py-2.5 px-4 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 hover:bg-emerald-100 font-semibold text-xs flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-                  >
-                    {isSyncing ? (
-                      <>
-                        <span className="w-3.5 h-3.5 border-2 border-emerald-700 dark:border-emerald-300 border-t-transparent rounded-full animate-spin" />
-                        <span>Saving to Firestore...</span>
-                      </>
-                    ) : syncSuccess ? (
-                      <>
-                        <Check className="w-4 h-4 text-emerald-600" />
-                        <span className="font-bold text-emerald-700 dark:text-emerald-300">Synchronized!</span>
-                      </>
-                    ) : (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5" />
-                        <span>Push State to Cloud</span>
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleResetCleanAccount}
-                    disabled={isSyncing}
-                    className="py-2.5 px-3 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 hover:bg-rose-100 text-xs font-semibold flex items-center justify-center gap-1.5"
-                    title="Purge any old guest data from your user account and reset to clean state"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Purge Guest Artifacts</span>
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         </div>
       )}
