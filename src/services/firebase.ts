@@ -10,6 +10,8 @@ import {
   signOut,
   sendPasswordResetEmail,
   onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence,
   User as FirebaseUser,
 } from 'firebase/auth';
 
@@ -49,6 +51,14 @@ if (typeof window !== 'undefined') {
 
 // Initialize Firebase Authentication
 export const auth = getAuth(app);
+
+// Enforce durable local session persistence for Android & Web
+if (typeof window !== 'undefined') {
+  setPersistence(auth, browserLocalPersistence).catch((err) => {
+    console.warn('[Firebase Auth] Persistence initialization note:', err);
+  });
+}
+
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: 'select_account',

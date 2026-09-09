@@ -21,6 +21,7 @@ import { speechService } from './services/speechService';
 import { audioService, ActiveQuranPlayback } from './services/audioService';
 import { Mic, Check, MapPin } from 'lucide-react';
 import { autoDetectAndApplyLocation, subscribeToLocationDetection } from './services/locationService';
+import { initNativeAndroid } from './services/nativeService';
 
 // Views
 import { HomeView } from './views/HomeView';
@@ -71,6 +72,33 @@ export default function App() {
     });
     return unsub;
   }, []);
+
+  // Initialize native Android status bar and hardware back button behavior
+  useEffect(() => {
+    initNativeAndroid(isDark, () => {
+      if (isSearchOpen) {
+        setIsSearchOpen(false);
+        return true;
+      }
+      if (isAuthOpen) {
+        setIsAuthOpen(false);
+        return true;
+      }
+      if (isVoiceNavOpen) {
+        setIsVoiceNavOpen(false);
+        return true;
+      }
+      if (activeExploreFeature) {
+        setActiveExploreFeature(null);
+        return true;
+      }
+      if (activeTab !== 'home') {
+        setActiveTab('home');
+        return true;
+      }
+      return false; // Exit app
+    });
+  }, [isDark, isSearchOpen, isAuthOpen, isVoiceNavOpen, activeExploreFeature, activeTab]);
 
   // Handle centralized profile update (both local and Firestore)
   const handleUpdateProfile = useCallback((updated: UserProfile) => {

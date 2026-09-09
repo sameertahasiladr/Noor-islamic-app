@@ -24,6 +24,7 @@ import {
   searchMosquesLive,
   formatDistance,
 } from '../services/mosqueService';
+import { detectCoordinates } from '../services/locationService';
 import { MosqueMapView } from '../components/MosqueMapView';
 
 interface MosqueFinderViewProps {
@@ -110,83 +111,75 @@ export const MosqueFinderView: React.FC<MosqueFinderViewProps> = ({
   }, [profile.location.latitude, profile.location.longitude, profile.location.city, profile.location.country, loadMosques, radiusKm, userLocation.lat, userLocation.lng]);
 
   // Auto-detect GPS with high precision
-  const handleDetectGPS = useCallback(() => {
-    if (!navigator.geolocation) {
-      setLocationStatus('GPS not supported, using current profile location');
+  const handleDetectGPS = useCallback(async () => {
+    setDetectingLocation(true);
+    setLocationStatus('Calibrating high-accuracy GPS coordinates...');
+
+    const coords = await detectCoordinates();
+    if (!coords) {
+      setDetectingLocation(false);
+      setLocationStatus(`GPS unavailable. Using ${userLocation.city}`);
       loadMosques(userLocation.lat, userLocation.lng, userLocation.city, radiusKm);
       return;
     }
 
-    setDetectingLocation(true);
-    setLocationStatus('Calibrating high-accuracy GPS coordinates...');
+    const { latitude, longitude } = coords;
+    setDetectingLocation(false);
+    setLocationStatus('GPS coordinates calibrated accurately');
 
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setDetectingLocation(false);
-        setLocationStatus('GPS coordinates calibrated accurately');
-
-        // Reverse geocode city name with OpenStreetMap Nominatim
-        let detectedCity = userLocation.city;
-        let detectedCountry = userLocation.country;
-        try {
-          const revRes = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14`,
-            {
-              headers: { 'User-Agent': 'NoorIslamicApp/2.0' },
-              signal: AbortSignal.timeout(4000),
-            }
-          );
-          if (revRes.ok) {
-            const revData = await revRes.json();
-            const addr = revData.address || {};
-            detectedCity =
-              addr.city ||
-              addr.town ||
-              addr.suburb ||
-              addr.municipality ||
-              addr.county ||
-              userLocation.city;
-            detectedCountry = addr.country || userLocation.country;
-          }
-        } catch {
-          // fallback to current
+    // Reverse geocode city name with OpenStreetMap Nominatim
+    let detectedCity = userLocation.city;
+    let detectedCountry = userLocation.country;
+    try {
+      const revRes = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14`,
+        {
+          headers: { 'User-Agent': 'NoorIslamicApp/2.0' },
+          signal: AbortSignal.timeout(4000),
         }
+      );
+      if (revRes.ok) {
+        const revData = await revRes.json();
+        const addr = revData.address || {};
+        detectedCity =
+          addr.city ||
+          addr.town ||
+          addr.suburb ||
+          addr.municipality ||
+          addr.county ||
+          userLocation.city;
+        detectedCountry = addr.country || userLocation.country;
+      }
+    } catch {
+      // fallback to current
+    }
 
-        const newLocation = {
-          lat: latitude,
-          lng: longitude,
+    const newLocation = {
+      lat: latitude,
+      lng: longitude,
+      city: detectedCity,
+      country: detectedCountry,
+      source: 'gps' as const,
+    };
+
+    setUserLocation(newLocation);
+
+    if (onUpdateProfile) {
+      const updated = {
+        ...profile,
+        location: {
+          ...profile.location,
           city: detectedCity,
           country: detectedCountry,
-          source: 'gps' as const,
-        };
+          latitude,
+          longitude,
+        },
+      };
+      onUpdateProfile(updated);
+      storageService.saveProfile(updated);
+    }
 
-        setUserLocation(newLocation);
-
-        if (onUpdateProfile) {
-          const updated = {
-            ...profile,
-            location: {
-              ...profile.location,
-              city: detectedCity,
-              country: detectedCountry,
-              latitude,
-              longitude,
-            },
-          };
-          onUpdateProfile(updated);
-          storageService.saveProfile(updated);
-        }
-
-        loadMosques(latitude, longitude, detectedCity, radiusKm);
-      },
-      (err) => {
-        setDetectingLocation(false);
-        setLocationStatus(`GPS unavailable (${err.message}). Using ${userLocation.city}`);
-        loadMosques(userLocation.lat, userLocation.lng, userLocation.city, radiusKm);
-      },
-      { timeout: 10000, enableHighAccuracy: true, maximumAge: 30000 }
-    );
+    loadMosques(latitude, longitude, detectedCity, radiusKm);
   }, [loadMosques, onUpdateProfile, profile, radiusKm, userLocation.city, userLocation.country, userLocation.lat, userLocation.lng]);
 
   // Initial load

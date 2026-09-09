@@ -26,6 +26,7 @@ import {
   LocationPreset
 } from '../services/prayerService';
 import { storageService } from '../services/storageService';
+import { detectCoordinates } from '../services/locationService';
 
 interface PrayerTimesViewProps {
   profile: UserProfile;
@@ -72,87 +73,71 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
     return best;
   };
 
-  // Detect location via browser Geolocation API with high accuracy
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) {
-      showBanner('error', 'Geolocation is not supported by your browser.');
+  // Detect location via native Capacitor GPS or browser Geolocation API with high accuracy
+  const handleDetectLocation = async () => {
+    setIsDetectingLocation(true);
+    const coords = await detectCoordinates();
+
+    if (!coords) {
+      setIsDetectingLocation(false);
+      showBanner('error', 'Location permission denied or unavailable.');
       return;
     }
 
-    setIsDetectingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        setIsDetectingLocation(false);
-        const lat = parseFloat(pos.coords.latitude.toFixed(4));
-        const lng = parseFloat(pos.coords.longitude.toFixed(4));
+    const { latitude: lat, longitude: lng } = coords;
+    let detectedCity = 'Current Location';
+    let detectedCountry = 'GPS Coordinates';
 
-        let detectedCity = 'Current Location';
-        let detectedCountry = 'GPS Coordinates';
-
-        try {
-          // Attempt reverse geocoding via OpenStreetMap Nominatim with short timeout
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3500);
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`,
-            { signal: controller.signal }
-          );
-          clearTimeout(timeoutId);
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.address) {
-              detectedCity =
-                data.address.city ||
-                data.address.town ||
-                data.address.municipality ||
-                data.address.county ||
-                'Detected Location';
-              detectedCountry = data.address.country || 'Detected Region';
-            }
-          }
-        } catch {
-          // Fallback: check if close to a popular location
-          const nearest = findNearestCity(lat, lng);
-          const dist = Math.hypot(nearest.latitude - lat, nearest.longitude - lng);
-          if (dist < 0.35) {
-            detectedCity = nearest.city;
-            detectedCountry = nearest.country;
-          } else {
-            detectedCity = `${lat > 0 ? lat + '°N' : Math.abs(lat) + '°S'}, ${lng > 0 ? lng + '°E' : Math.abs(lng) + '°W'}`;
-            detectedCountry = 'Precise GPS';
-          }
+    try {
+      // Attempt reverse geocoding via OpenStreetMap Nominatim with short timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`,
+        { signal: controller.signal }
+      );
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.address) {
+          detectedCity =
+            data.address.city ||
+            data.address.town ||
+            data.address.municipality ||
+            data.address.county ||
+            'Detected Location';
+          detectedCountry = data.address.country || 'Detected Region';
         }
+      }
+    } catch {
+      // Fallback: check if close to a popular location
+      const nearest = findNearestCity(lat, lng);
+      const dist = Math.hypot(nearest.latitude - lat, nearest.longitude - lng);
+      if (dist < 0.35) {
+        detectedCity = nearest.city;
+        detectedCountry = nearest.country;
+      } else {
+        detectedCity = `${lat > 0 ? lat + '°N' : Math.abs(lat) + '°S'}, ${lng > 0 ? lng + '°E' : Math.abs(lng) + '°W'}`;
+        detectedCountry = 'Precise GPS';
+      }
+    }
 
-        const updatedLoc = {
-          city: detectedCity,
-          country: detectedCountry,
-          latitude: lat,
-          longitude: lng,
-        };
+    setIsDetectingLocation(false);
+    const updatedLoc = {
+      city: detectedCity,
+      country: detectedCountry,
+      latitude: lat,
+      longitude: lng,
+    };
 
-        const updatedProfile = { ...profile, location: updatedLoc };
-        onUpdateProfile(updatedProfile);
-        storageService.updateLocation(updatedLoc);
-        setCustomCityName(detectedCity);
-        setCustomCountryName(detectedCountry);
-        setCustomLat(lat.toString());
-        setCustomLng(lng.toString());
-        showBanner('success', `Exact GPS position acquired: ${detectedCity}!`);
-      },
-      (err) => {
-        setIsDetectingLocation(false);
-        let errorMsg = 'Could not access GPS location.';
-        if (err.code === 1) {
-          errorMsg = 'Location permission denied. Please select a city or enter coordinates manually.';
-        } else if (err.code === 2) {
-          errorMsg = 'Location unavailable. Please select your city from the list below.';
-        } else if (err.code === 3) {
-          errorMsg = 'Location request timed out. Try again or enter coordinates manually.';
-        }
-        showBanner('error', errorMsg);
-      },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
-    );
+    const updatedProfile = { ...profile, location: updatedLoc };
+    onUpdateProfile(updatedProfile);
+    storageService.updateLocation(updatedLoc);
+    setCustomCityName(detectedCity);
+    setCustomCountryName(detectedCountry);
+    setCustomLat(lat.toString());
+    setCustomLng(lng.toString());
+    showBanner('success', `Exact GPS position acquired: ${detectedCity}!`);
   };
 
   const handleSelectCity = (cityItem: LocationPreset) => {

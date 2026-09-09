@@ -1,3 +1,5 @@
+import { Capacitor } from '@capacitor/core';
+import { Geolocation } from '@capacitor/geolocation';
 import { POPULAR_LOCATIONS, LocationPreset } from './prayerService';
 import { UserProfile } from '../types';
 import { storageService } from './storageService';
@@ -9,6 +11,26 @@ export interface DetectedLocation {
   latitude: number;
   longitude: number;
 }
+
+/**
+ * Requests device GPS permissions properly on Android / Native and Web
+ */
+export const requestLocationPermission = async (): Promise<boolean> => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const check = await Geolocation.checkPermissions();
+      if (check.location === 'granted') {
+        return true;
+      }
+      const req = await Geolocation.requestPermissions({ permissions: ['location'] });
+      return req.location === 'granted';
+    } catch (e) {
+      console.warn('[LocationService] Native permission check/request failed:', e);
+      return false;
+    }
+  }
+  return true;
+};
 
 /**
  * Calculates distance to find closest known preset city
@@ -38,9 +60,30 @@ export const findNearestPresetCity = (lat: number, lng: number): LocationPreset 
 };
 
 /**
- * Requests device GPS coordinates via standard Web Geolocation API
+ * Requests device GPS coordinates via native Capacitor Geolocation on Android
+ * or standard Web Geolocation API on browsers
  */
-export const detectCoordinates = (): Promise<{ latitude: number; longitude: number } | null> => {
+export const detectCoordinates = async (): Promise<{ latitude: number; longitude: number } | null> => {
+  // If running on native Android/iOS
+  if (Capacitor.isNativePlatform()) {
+    try {
+      await requestLocationPermission();
+      const pos = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 30000,
+      });
+      return {
+        latitude: parseFloat(pos.coords.latitude.toFixed(4)),
+        longitude: parseFloat(pos.coords.longitude.toFixed(4)),
+      };
+    } catch (err: any) {
+      console.warn('[LocationService] Native Geolocation error:', err?.message || err);
+      // fallback to navigator below
+    }
+  }
+
+  // Web Browser fallback
   return new Promise((resolve) => {
     if (typeof window === 'undefined' || !navigator || !navigator.geolocation) {
       resolve(null);

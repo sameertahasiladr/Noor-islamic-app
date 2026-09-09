@@ -1,10 +1,12 @@
 {
   "projectId": "noor-5cee7",
-  "appId": "1:532763387955:web:858ea2c3ff00fa45d8db46",
+  "appId": "1:532763387955:web:02a5c1d8b5ca5ba7d8db46",
   "apiKey": "AIzaSyBP8pQ7cjrdq1LIzu8RlVZhXxDCRY2loiw",
   "authDomain": "noor-5cee7.firebaseapp.com",
-  "firestoreDatabaseId": "(default)",
+  "firestoreDatabaseId": "ai-studio-nooryourislamicc-8a3cd099-fc71-4dd0-ae4c-1daeafc11d31",
   "storageBucket": "noor-5cee7.firebasestorage.app",
   "messagingSenderId": "532763387955",
-  "measurementId": "G-J5XBF2RT0M"
+  "measurementId": "",
+  "oAuthClientId": "532763387955-vr9dgm6ces751il10i0icjf8el8ugkb8.apps.googleusercontent.com",
+  "recaptchaSiteKey": ""
 }
