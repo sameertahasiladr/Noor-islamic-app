@@ -30,6 +30,7 @@ import {
 } from '../services/firebase';
 import { storageService } from '../services/storageService';
 import { autoDetectAndApplyLocation } from '../services/locationService';
+import { isNative } from '../services/nativeService';
 
 interface OpeningFlowModalProps {
   isOpen: boolean;
@@ -210,7 +211,11 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
         setUnauthorizedDomain(host);
         setErrorMsg(null);
       } else {
-        setErrorMsg(err?.message || 'Google sign-in could not complete. You may use email or Guest Mode.');
+        if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+          setErrorMsg('Google sign-in was cancelled. Please try again.');
+        } else {
+          setErrorMsg(err?.message || 'Google sign-in could not complete. Please try again or use email.');
+        }
       }
     }
   };
@@ -401,7 +406,9 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
             {errorMsg && (
               <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex items-start gap-2 text-xs text-rose-700 dark:text-rose-300">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
-                <p className="text-[11px] leading-relaxed">{errorMsg}</p>
+                <div className="w-full">
+                  <p className="text-[11px] leading-relaxed">{errorMsg}</p>
+                </div>
               </div>
             )}
 

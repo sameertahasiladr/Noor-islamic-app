@@ -4,6 +4,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithCredential,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
@@ -14,6 +15,7 @@ import {
   browserLocalPersistence,
   User as FirebaseUser,
 } from 'firebase/auth';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
 export { onAuthStateChanged };
 export type { FirebaseUser };
@@ -30,6 +32,7 @@ import {
 } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { UserProfile, QuranBookmark, TasbihRecord } from '../types';
+import { isNative } from './nativeService';
 
 // Initialize Firebase App with user's new project configuration
 export const app = initializeApp(firebaseConfig);
@@ -136,6 +139,40 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
  * Authentication Helper Functions
  */
 export const signInWithGoogle = async (): Promise<FirebaseUser> => {
+  if (isNative()) {
+    try {
+      // 1. Native Google Sign-In via Capacitor Firebase Authentication (Credential Manager on Android)
+      const result = await FirebaseAuthentication.signInWithGoogle({
+        useCredentialManager: true,
+      });
+
+      const idToken = result.credential?.idToken;
+      if (!idToken) {
+        throw new Error('Native Google sign-in completed, but no ID token was returned.');
+      }
+
+      // 2. Exchange the Google ID token with Firebase Authentication
+      const credential = GoogleAuthProvider.credential(idToken);
+      const userCredential = await signInWithCredential(auth, credential);
+      return userCredential.user;
+    } catch (nativeError: any) {
+      console.error('[Firebase Auth] Native Google Sign-In error:', nativeError);
+      // Cleanly normalize user cancellation
+      if (
+        nativeError?.message?.includes('cancel') ||
+        nativeError?.code === '16' ||
+        nativeError?.message?.includes('16:') ||
+        nativeError?.code === '12501' ||
+        nativeError?.message?.includes('12501')
+      ) {
+        const cancelErr = new Error('Google sign-in was cancelled.');
+        (cancelErr as any).code = 'auth/popup-closed-by-user';
+        throw cancelErr;
+      }
+      throw nativeError;
+    }
+  }
+
   try {
     const result = await signInWithPopup(auth, googleProvider);
     return result.user;
@@ -172,6 +209,13 @@ export const sendPasswordReset = async (email: string): Promise<void> => {
 };
 
 export const logOutUser = async (): Promise<void> => {
+  if (isNative()) {
+    try {
+      await FirebaseAuthentication.signOut();
+    } catch (err) {
+      console.warn('[Firebase Auth] Native signOut error (non-fatal):', err);
+    }
+  }
   await signOut(auth);
 };
 

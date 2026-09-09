@@ -12,6 +12,7 @@ import {
   Check,
   ExternalLink,
   ShieldAlert,
+  Info,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import {
@@ -25,6 +26,7 @@ import {
 } from '../services/firebase';
 import { storageService } from '../services/storageService';
 import { autoDetectAndApplyLocation } from '../services/locationService';
+import { isNative } from '../services/nativeService';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -70,10 +72,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return 'This app domain is not yet authorized for Google Sign-In in your Firebase Project (noor-5cee7). Follow the quick steps below, or use Email/Password.';
     }
     if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-      return 'Sign-in window was closed. Please try again or use Email & Password.';
+      return 'Google sign-in was cancelled. Please try again.';
     }
     if (code === 'auth/popup-blocked') {
-      return 'Sign-in popup was blocked by your browser. Please allow popups or use Email & Password.';
+      return 'Sign-in popup was blocked by your browser. Please allow popups or try again.';
     }
     if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
       return 'Invalid email or password. If you do not have an account yet, switch to "Sign up free" below.';
@@ -344,7 +346,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {errorMessage && (
             <div className="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 flex items-start gap-2.5 text-xs text-rose-700 dark:text-rose-300">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
-              <div>
+              <div className="w-full">
                 <p className="font-semibold">Notice</p>
                 <p className="mt-0.5 text-[11px] leading-relaxed">{errorMessage}</p>
               </div>
