@@ -1,0 +1,73 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and spiritual tracking preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "city": { "type": "string" },
+            "country": { "type": "string" },
+            "latitude": { "type": "number" },
+            "longitude": { "type": "number" }
+          }
+        },
+        "prayerCalculationMethod": { "type": "string" },
+        "asrMethod": { "type": "string" },
+        "darkMode": { "type": "boolean" },
+        "qadaPrayers": { "type": "object" },
+        "ramadanCompletedDays": { "type": "array", "items": { "type": "number" } },
+        "quizScore": { "type": "number" },
+        "favoriteDuas": { "type": "array", "items": { "type": "string" } },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Bookmark": {
+      "title": "Bookmark",
+      "description": "User saved Quran bookmarks",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "surahNumber": { "type": "number" },
+        "surahName": { "type": "string" },
+        "ayahNumber": { "type": "number" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "surahNumber", "ayahNumber"]
+    },
+    "TasbihLog": {
+      "title": "TasbihLog",
+      "description": "Completed Dhikr records",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "dhikr": { "type": "string" },
+        "count": { "type": "number" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "dhikr", "count"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "/users/{userId}/bookmarks/{bookmarkId}": {
+      "schema": "Bookmark",
+      "description": "Saved Quran bookmarks for a user"
+    },
+    "/users/{userId}/tasbihLogs/{logId}": {
+      "schema": "TasbihLog",
+      "description": "User dhikr log records"
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "Noor – Your Islamic Companion",
+  "description": "An all-in-one Islamic companion featuring Prayer Times, Holy Quran, Qibla Direction, Duas, Hadith, Digital Tasbih, Ramadan Tools, Zakat Calculator, Mosque Finder, and more.",
+  "requestFramePermissions": ["geolocation", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
