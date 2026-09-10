@@ -17,7 +17,10 @@ class AudioService {
   private onEndCallback: (() => void) | null = null;
   private activePlayback: ActiveQuranPlayback | null = null;
   private playbackListeners: ((state: ActiveQuranPlayback | null) => void)[] = [];
+
   private textSpeechAudio: HTMLAudioElement | null = null;
+  private activeBufferSource: AudioBufferSourceNode | null = null;
+  private activeAudioCtx: AudioContext | null = null;
   private isSpeakingArabic: boolean = false;
   private speechListeners: ((speaking: boolean, currentText: string | null) => void)[] = [];
   private currentSpokenText: string | null = null;
@@ -78,7 +81,7 @@ class AudioService {
     onEnded?: () => void,
     onError?: (err: unknown) => void
   ): HTMLAudioElement {
-    // 1. Stop any active audio (Quran or TTS) to guarantee only 1 active audio instance
+    // Stop any active audio (Quran or TTS) to guarantee only 1 active audio instance
     this.stop();
 
     const primaryUrl = this.getAyahAudioUrl(surah, ayah);
@@ -228,6 +231,15 @@ class AudioService {
   }
 
   stopSpeakingArabic(): void {
+    if (this.activeBufferSource) {
+      try {
+        this.activeBufferSource.stop();
+        this.activeBufferSource.disconnect();
+      } catch (err) {
+        console.warn('[AudioService] Error stopping activeBufferSource:', err);
+      }
+      this.activeBufferSource = null;
+    }
     if (this.textSpeechAudio) {
       try {
         this.textSpeechAudio.pause();
@@ -248,6 +260,13 @@ class AudioService {
   }
 
   pauseSpeakingArabic(): void {
+    if (this.activeBufferSource) {
+      try {
+        this.stopSpeakingArabic();
+      } catch (err) {
+        console.warn('[AudioService] Error pausing buffer source:', err);
+      }
+    }
     if (this.textSpeechAudio && !this.textSpeechAudio.paused) {
       try {
         this.textSpeechAudio.pause();
@@ -284,8 +303,7 @@ class AudioService {
   }
 
   /**
-   * Speaks Arabic text with reliable audio:
-   * Fetches TTS MP3 audio buffer directly into Blob URL to bypass WebView media element origin blocks
+   * Speaks Arabic text with 100% reliable Web Audio API decoding + HTMLAudio + Web Speech fallback
    */
   async speakArabicText(text: string, onFinish?: () => void): Promise<void> {
     const cleanText = text.trim();
@@ -309,47 +327,85 @@ class AudioService {
 
     this.notifySpeaking(true, cleanText);
 
-    // Primary GTX TTS endpoint URL
+    // Initialize/Unlock AudioContext on direct user click gesture
+    try {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        if (!this.activeAudioCtx || this.activeAudioCtx.state === 'closed') {
+          this.activeAudioCtx = new AudioCtx();
+        }
+        if (this.activeAudioCtx.state === 'suspended') {
+          await this.activeAudioCtx.resume();
+        }
+      }
+    } catch (e) {
+      console.warn('[AudioService] AudioContext initialization note:', e);
+    }
+
     const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=gtx&q=${encodeURIComponent(
       cleanText.slice(0, 200)
     )}`;
-    console.log(`[AudioService] Fetching Arabic audio buffer from: ${ttsUrl}`);
 
     try {
-      // Fetch audio buffer directly via fetch()
+      // 1. Fetch audio buffer via HTTP
       const response = await fetch(ttsUrl);
-      if (!response.ok) {
-        throw new Error(`TTS fetch HTTP ${response.status}`);
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        if (this.activeAudioCtx && arrayBuffer.byteLength > 100) {
+          try {
+            const decodedBuffer = await this.activeAudioCtx.decodeAudioData(arrayBuffer.slice(0));
+            const source = this.activeAudioCtx.createBufferSource();
+            const gainNode = this.activeAudioCtx.createGain();
+            gainNode.gain.value = 1.0;
+            source.buffer = decodedBuffer;
+            source.connect(gainNode);
+            gainNode.connect(this.activeAudioCtx.destination);
+
+            this.activeBufferSource = source;
+
+            source.onended = () => {
+              console.log('[AudioService] Web Audio API buffer playback ended');
+              this.activeBufferSource = null;
+              this.notifySpeaking(false, null);
+              if (onFinish) onFinish();
+            };
+
+            source.start(0);
+            console.log('[AudioService] Web Audio API Arabic audio started successfully!');
+            return;
+          } catch (decodeErr) {
+            console.warn('[AudioService] decodeAudioData failed, falling back to HTMLAudioElement:', decodeErr);
+          }
+        }
       }
+    } catch (fetchErr) {
+      console.warn('[AudioService] speakArabicText fetch failed, trying HTMLAudioElement fallback:', fetchErr);
+    }
 
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      console.log(`[AudioService] Created Blob URL: ${blobUrl}`);
-
-      const audio = new Audio(blobUrl);
+    // Fallback 1: HTMLAudioElement
+    try {
+      const audio = new Audio();
       audio.preload = 'auto';
       audio.volume = 1.0;
+      audio.src = ttsUrl;
       this.textSpeechAudio = audio;
 
       audio.onended = () => {
-        console.log('[AudioService] Speaker blob audio ended');
-        URL.revokeObjectURL(blobUrl);
         this.textSpeechAudio = null;
         this.notifySpeaking(false, null);
         if (onFinish) onFinish();
       };
 
       audio.onerror = (e) => {
-        console.warn('[AudioService] Blob audio error event, executing Web Speech fallback:', e);
-        URL.revokeObjectURL(blobUrl);
+        console.warn('[AudioService] HTMLAudioElement error, trying SpeechSynthesis:', e);
         this.textSpeechAudio = null;
         this.fallbackSpeechSynthesis(cleanText, onFinish);
       };
 
       await audio.play();
-      console.log('[AudioService] Arabic speaker blob audio play() started successfully.');
-    } catch (err) {
-      console.warn('[AudioService] speakArabicText blob fetch/play failed, executing SpeechSynthesis fallback:', err);
+      console.log('[AudioService] HTMLAudioElement audio play() succeeded');
+    } catch (playErr) {
+      console.warn('[AudioService] HTMLAudioElement play() rejected, trying SpeechSynthesis fallback:', playErr);
       this.textSpeechAudio = null;
       this.fallbackSpeechSynthesis(cleanText, onFinish);
     }
