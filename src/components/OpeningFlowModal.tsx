@@ -243,20 +243,20 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-lg bg-white dark:bg-[#0D1E17] rounded-3xl shadow-2xl border border-[#E8E4DC] dark:border-emerald-900/30 overflow-hidden">
         {/* STAGE 1: RANDOM ISLAMIC QUOTE SCREEN */}
         {stage === 'quote' && (
           <div className="p-6 sm:p-8 space-y-6 text-center">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-200/60 dark:border-emerald-900/60">
-                <Moon className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-800 dark:text-amber-300 flex items-center gap-1.5 bg-emerald-800/10 dark:bg-emerald-950 px-3 py-1 rounded-full border border-emerald-700/20">
+                <Moon className="w-3.5 h-3.5 text-amber-500" />
                 Noor • Words of Wisdom
               </span>
 
               <button
                 onClick={handleNextQuote}
-                className="text-xs text-zinc-500 hover:text-emerald-700 dark:text-zinc-400 dark:hover:text-emerald-400 flex items-center gap-1 transition-colors"
+                className="text-xs text-[#5C6F66] hover:text-emerald-800 dark:text-[#9EB2A7] dark:hover:text-amber-300 flex items-center gap-1 transition-colors font-medium"
                 title="Shuffle another quote"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
@@ -265,23 +265,23 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
             </div>
 
             {/* Quote Card */}
-            <div className="py-6 px-4 sm:px-6 rounded-3xl bg-gradient-to-br from-emerald-950 via-teal-900 to-zinc-950 text-white shadow-xl relative overflow-hidden border border-emerald-800/40">
-              <span className="text-[11px] uppercase tracking-wider font-semibold text-amber-300 block mb-3">
+            <div className="py-7 px-5 sm:px-8 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#0A3326] to-[#041F17] text-white shadow-xl relative overflow-hidden border border-emerald-700/30">
+              <span className="text-[11px] uppercase tracking-wider font-bold text-amber-400 block mb-3">
                 {currentQuote.topic}
               </span>
 
               <p
                 dir="rtl"
-                className="text-2xl sm:text-3xl font-arabic font-bold text-center leading-loose text-white mb-4"
+                className="text-2xl sm:text-3xl font-quran font-bold text-center leading-loose text-white mb-4"
               >
                 {currentQuote.arabic}
               </p>
 
-              <p className="text-sm sm:text-base text-zinc-200 font-serif italic leading-relaxed max-w-md mx-auto">
+              <p className="text-sm sm:text-base text-[#F4F3EC] font-serif italic leading-relaxed max-w-md mx-auto">
                 "{currentQuote.translation}"
               </p>
 
-              <span className="inline-block mt-4 text-xs font-bold text-amber-400/90 bg-black/30 px-3 py-1 rounded-full">
+              <span className="inline-block mt-4 text-xs font-bold text-amber-300 bg-black/30 border border-amber-400/20 px-3 py-1 rounded-full">
                 — {currentQuote.source}
               </span>
             </div>
@@ -290,15 +290,15 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
             <div className="space-y-2 pt-2">
               <button
                 onClick={handleContinueToAuth}
-                className="w-full py-3 px-6 rounded-2xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group"
+                className="w-full py-3 px-6 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm shadow-xs transition-all flex items-center justify-center gap-2 group"
               >
                 <span>Continue to Sign In / Guest Mode</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform text-amber-300" />
               </button>
 
               <button
                 onClick={handleContinueAsGuest}
-                className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 font-medium py-1"
+                className="text-xs text-[#5C6F66] dark:text-[#9EB2A7] hover:text-[#14241D] dark:hover:text-[#F4F3EC] font-semibold py-1 transition-colors"
               >
                 Skip straight to Guest Mode
               </button>
@@ -310,28 +310,28 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
         {stage === 'auth' && (
           <div className="p-6 sm:p-7 space-y-4">
             <div className="text-center space-y-1">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-arabic font-bold text-2xl flex items-center justify-center mx-auto shadow-xs">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-800/10 dark:bg-emerald-950 text-emerald-800 dark:text-amber-300 font-quran font-bold text-2xl flex items-center justify-center mx-auto shadow-xs border border-emerald-700/20">
                 نُور
               </div>
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+              <h2 className="text-xl font-bold text-[#14241D] dark:text-[#F4F3EC]">
                 Welcome to Noor Islamic Companion
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
+              <p className="text-xs text-[#5C6F66] dark:text-[#9EB2A7] max-w-sm mx-auto">
                 Sign in to back up your Quran reading, tasbih logs & bookmarks, or use Guest Mode freely.
               </p>
             </div>
 
             {/* Sign In / Sign Up Mode Pill */}
-            <div className="flex items-center p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl max-w-xs mx-auto text-xs font-bold">
+            <div className="flex items-center p-1 bg-[#ECE7DE] dark:bg-[#0A1A13] rounded-2xl max-w-xs mx-auto text-xs font-bold border border-[#E0DBD0] dark:border-emerald-950/80">
               <button
                 onClick={() => {
                   setErrorMsg(null);
                   setAuthMode('signin');
                 }}
-                className={`flex-1 py-1.5 rounded-lg transition-all ${
+                className={`flex-1 py-1.5 rounded-xl transition-all ${
                   authMode === 'signin'
-                    ? 'bg-white dark:bg-zinc-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
-                    : 'text-zinc-500 dark:text-zinc-400'
+                    ? 'bg-white dark:bg-[#0D1E17] text-emerald-800 dark:text-amber-300 shadow-xs'
+                    : 'text-[#5C6F66] dark:text-[#9EB2A7]'
                 }`}
               >
                 Sign In
@@ -341,10 +341,10 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
                   setErrorMsg(null);
                   setAuthMode('signup');
                 }}
-                className={`flex-1 py-1.5 rounded-lg transition-all ${
+                className={`flex-1 py-1.5 rounded-xl transition-all ${
                   authMode === 'signup'
-                    ? 'bg-white dark:bg-zinc-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
-                    : 'text-zinc-500 dark:text-zinc-400'
+                    ? 'bg-white dark:bg-[#0D1E17] text-emerald-800 dark:text-amber-300 shadow-xs'
+                    : 'text-[#5C6F66] dark:text-[#9EB2A7]'
                 }`}
               >
                 Create Account
@@ -445,7 +445,7 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
                 <button
                   onClick={handleGoogleAuth}
                   disabled={loading}
-                  className="w-full py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-200 text-xs font-semibold flex items-center justify-center gap-2 shadow-xs transition-all disabled:opacity-50"
+                  className="w-full py-2.5 px-4 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-white dark:bg-[#14241D] hover:bg-[#FAF8F5] text-[#14241D] dark:text-[#F4F3EC] text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all disabled:opacity-50"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path
@@ -469,8 +469,8 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
                 </button>
 
                 <div className="relative flex items-center justify-center my-2">
-                  <div className="border-t border-zinc-200 dark:border-zinc-800 w-full" />
-                  <span className="bg-white dark:bg-zinc-900 px-3 text-[10px] text-zinc-400 uppercase font-semibold">
+                  <div className="border-t border-[#E8E4DC] dark:border-emerald-950/80 w-full" />
+                  <span className="bg-white dark:bg-[#0D1E17] px-3 text-[10px] text-[#5C6F66] dark:text-[#9EB2A7] uppercase font-bold tracking-wider">
                     Or with email
                   </span>
                 </div>
@@ -479,46 +479,46 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
                 <form onSubmit={handleAuthSubmit} className="space-y-2.5">
                   {authMode === 'signup' && (
                     <div>
-                      <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                      <label className="block text-[11px] font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                         Your Name
                       </label>
                       <div className="relative">
-                        <User className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
+                        <User className="w-4 h-4 text-[#5C6F66] absolute left-3 top-2.5" />
                         <input
                           type="text"
                           required
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           placeholder="e.g. Tariq Mansoor"
-                          className="w-full pl-9 pr-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                          className="w-full pl-9 pr-3 py-2 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-[#FAF8F5] dark:bg-[#14241D] text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                         />
                       </div>
                     </div>
                   )}
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    <label className="block text-[11px] font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                       Email Address
                     </label>
                     <div className="relative">
-                      <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
+                      <Mail className="w-4 h-4 text-[#5C6F66] absolute left-3 top-2.5" />
                       <input
                         type="email"
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your.email@example.com"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                        className="w-full pl-9 pr-3 py-2 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-[#FAF8F5] dark:bg-[#14241D] text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    <label className="block text-[11px] font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                       Password (min 6 characters)
                     </label>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-2.5" />
+                      <Lock className="w-4 h-4 text-[#5C6F66] absolute left-3 top-2.5" />
                       <input
                         type="password"
                         required
@@ -526,7 +526,7 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                        className="w-full pl-9 pr-3 py-2 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-[#FAF8F5] dark:bg-[#14241D] text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                       />
                     </div>
                   </div>
@@ -534,7 +534,7 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full mt-1 py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                    className="w-full mt-1 py-2.5 px-4 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
                   >
                     {loading ? (
                       <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -545,15 +545,15 @@ export const OpeningFlowModal: React.FC<OpeningFlowModalProps> = ({
                 </form>
 
                 {/* GUEST MODE BUTTON */}
-                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-1.5">
+                <div className="pt-2 border-t border-[#E8E4DC] dark:border-emerald-950/80 space-y-1.5">
                   <button
                     onClick={handleContinueAsGuest}
-                    className="w-full py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/70 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
+                    className="w-full py-2.5 px-4 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-[#FAF8F5] dark:bg-[#14241D] hover:bg-[#F0EBE1] text-[#14241D] dark:text-[#F4F3EC] font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-xs"
                   >
                     <span>Continue as Guest (No Sign Up Needed)</span>
-                    <ChevronRight className="w-4 h-4 text-zinc-400" />
+                    <ChevronRight className="w-4 h-4 text-amber-600" />
                   </button>
-                  <p className="text-[10px] text-center text-zinc-400">
+                  <p className="text-[10px] text-center text-[#5C6F66] dark:text-[#9EB2A7]">
                     If you do not sign in, you can still use all app features with local storage.
                   </p>
                 </div>

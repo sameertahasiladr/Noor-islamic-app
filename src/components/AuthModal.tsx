@@ -265,17 +265,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/70 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
+      <div className="w-full max-w-md bg-white dark:bg-[#0D1E17] rounded-3xl shadow-2xl border border-[#E8E4DC] dark:border-emerald-900/30 overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E4DC] dark:border-emerald-900/30">
           <div>
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+            <h2 className="text-lg font-bold text-[#14241D] dark:text-[#F4F3EC]">
               {mode === 'login' && 'Sign in to Noor'}
               {mode === 'signup' && 'Create Free Account'}
               {mode === 'forgot' && 'Reset Password'}
             </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="text-xs text-[#5C6F66] dark:text-[#9EB2A7]">
               {mode === 'login' && 'Sync bookmarks, reading progress & daily dhikr'}
               {mode === 'signup' && 'Preserve your Quran reading & prayer streaks'}
               {mode === 'forgot' && 'Enter your email to receive recovery instructions'}
@@ -283,7 +283,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            className="p-1 rounded-xl text-[#5C6F66] hover:text-[#14241D] dark:hover:text-[#F4F3EC] transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -390,7 +390,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   type="button"
                   onClick={handleGoogleSignIn}
                   disabled={loading}
-                  className="w-full mb-3 py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-200 text-sm font-semibold flex items-center justify-center gap-2.5 transition-all shadow-xs"
+                  className="w-full mb-3 py-2.5 px-4 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-white dark:bg-[#14241D] hover:bg-[#FAF8F5] text-[#14241D] dark:text-[#F4F3EC] text-sm font-bold flex items-center justify-center gap-2.5 transition-all shadow-xs"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path
@@ -416,8 +416,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               {mode !== 'forgot' && (
                 <div className="relative flex items-center justify-center my-3">
-                  <div className="border-t border-zinc-200 dark:border-zinc-800 w-full" />
-                  <span className="bg-white dark:bg-zinc-900 px-3 text-xs text-zinc-400 font-medium uppercase">
+                  <div className="border-t border-[#E8E4DC] dark:border-emerald-950/80 w-full" />
+                  <span className="bg-white dark:bg-[#0D1E17] px-3 text-xs text-[#5C6F66] dark:text-[#9EB2A7] font-bold uppercase tracking-wider">
                     Or with email
                   </span>
                 </div>
@@ -426,36 +426,36 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <form onSubmit={handleSubmit} className="space-y-3">
                 {mode === 'signup' && (
                   <div>
-                    <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                    <label className="block text-xs font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                       Full Name
                     </label>
                     <div className="relative">
-                      <UserIcon className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                      <UserIcon className="w-4 h-4 text-[#5C6F66] absolute left-3 top-3" />
                       <input
                         type="text"
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="e.g. Tariq Mansoor"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                        className="w-full pl-9 pr-3 py-2 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-[#FAF8F5] dark:bg-[#14241D] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                       />
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                  <label className="block text-xs font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                    <Mail className="w-4 h-4 text-[#5C6F66] absolute left-3 top-3" />
                     <input
                       type="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="your.email@example.com"
-                      className="w-full pl-9 pr-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                      className="w-full pl-9 pr-3 py-2 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-[#FAF8F5] dark:bg-[#14241D] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                     />
                   </div>
                 </div>
@@ -463,21 +463,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 {mode !== 'forgot' && (
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                      <label className="text-xs font-bold text-[#14241D] dark:text-[#F4F3EC]">
                         Password
                       </label>
                       {mode === 'login' && (
                         <button
                           type="button"
                           onClick={() => setMode('forgot')}
-                          className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                          className="text-xs text-emerald-800 dark:text-amber-300 hover:underline font-bold"
                         >
                           Forgot Password?
                         </button>
                       )}
                     </div>
                     <div className="relative">
-                      <Lock className="w-4 h-4 text-zinc-400 absolute left-3 top-3" />
+                      <Lock className="w-4 h-4 text-[#5C6F66] absolute left-3 top-3" />
                       <input
                         type="password"
                         required
@@ -485,7 +485,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="At least 6 characters"
-                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                        className="w-full pl-9 pr-3 py-2 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-[#FAF8F5] dark:bg-[#14241D] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                       />
                     </div>
                   </div>
@@ -494,7 +494,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-1 py-2.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  className="w-full mt-1 py-2.5 px-4 rounded-2xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm shadow-xs transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
                   {loading ? (
                     <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -505,29 +505,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         {mode === 'signup' && 'Create Account'}
                         {mode === 'forgot' && 'Send Recovery Email'}
                       </span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 text-amber-300" />
                     </>
                   )}
                 </button>
               </form>
 
               {/* Guest Mode Option */}
-              <div className="mt-3 pt-3 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="mt-3 pt-3 border-t border-[#E8E4DC] dark:border-emerald-950/80">
                 <button
                   type="button"
                   onClick={handleGuestChoice}
-                  className="w-full py-2.5 px-3 rounded-xl border border-zinc-200/80 dark:border-zinc-700/80 bg-zinc-50 dark:bg-zinc-800/60 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                  className="w-full py-2.5 px-3 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/40 bg-[#FAF8F5] dark:bg-[#14241D] hover:bg-[#F0EBE1] text-[#14241D] dark:text-[#F4F3EC] font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs"
                 >
-                  <UserCheck className="w-4 h-4 text-zinc-500" />
+                  <UserCheck className="w-4 h-4 text-amber-600" />
                   <span>Continue as Guest (Use Without Sign In)</span>
                 </button>
-                <p className="text-[10px] text-center text-zinc-400 mt-1">
+                <p className="text-[10px] text-center text-[#5C6F66] dark:text-[#9EB2A7] mt-1">
                   Enjoy complete Quran, prayer times, dhikr & duas without an account.
                 </p>
               </div>
 
               {/* Mode toggles */}
-              <div className="mt-3 text-center text-xs text-zinc-500">
+              <div className="mt-3 text-center text-xs text-[#5C6F66] dark:text-[#9EB2A7]">
                 {mode === 'login' && (
                   <p>
                     Don't have an account?{' '}
@@ -537,7 +537,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         setErrorMessage(null);
                         setMode('signup');
                       }}
-                      className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                      className="font-bold text-emerald-800 dark:text-amber-300 hover:underline"
                     >
                       Sign up free
                     </button>
@@ -552,7 +552,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         setErrorMessage(null);
                         setMode('login');
                       }}
-                      className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                      className="font-bold text-emerald-800 dark:text-amber-300 hover:underline"
                     >
                       Sign in
                     </button>
@@ -565,7 +565,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       setErrorMessage(null);
                       setMode('login');
                     }}
-                    className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                    className="font-bold text-emerald-800 dark:text-amber-300 hover:underline"
                   >
                     Back to Sign in
                   </button>

@@ -10,6 +10,12 @@ const GUEST_STORAGE_KEY = 'noor_guest_profile';
 const ACTIVE_UID_KEY = 'noor_active_uid';
 const getUserKey = (uid: string) => `noor_user_profile_${uid}`;
 
+const isIndiaUser = typeof Intl !== 'undefined' && (
+  Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Kolkata' ||
+  Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Calcutta' ||
+  new Date().getTimezoneOffset() === -330
+);
+
 export const DEFAULT_GUEST_PROFILE: UserProfile = {
   id: 'guest_default',
   name: 'Guest Seeker',
@@ -17,14 +23,21 @@ export const DEFAULT_GUEST_PROFILE: UserProfile = {
   avatar: undefined,
   isGuest: true,
   preferredLanguage: 'English',
-  location: {
-    city: 'Makkah',
-    country: 'Saudi Arabia',
-    latitude: 21.4225,
-    longitude: 39.8262,
-  },
-  prayerCalculationMethod: 'MWL',
-  asrMethod: 'standard',
+  location: isIndiaUser
+    ? {
+        city: 'New Delhi',
+        country: 'India',
+        latitude: 28.6139,
+        longitude: 77.2090,
+      }
+    : {
+        city: 'Makkah',
+        country: 'Saudi Arabia',
+        latitude: 21.4225,
+        longitude: 39.8262,
+      },
+  prayerCalculationMethod: isIndiaUser ? 'Karachi' : 'MWL',
+  asrMethod: isIndiaUser ? 'hanafi' : 'standard',
   hijriDateAdjustment: 0,
   prayerTimeOffsets: {
     fajr: 0,
@@ -42,6 +55,12 @@ export const DEFAULT_GUEST_PROFILE: UserProfile = {
     asr: true,
     maghrib: true,
     isha: true,
+    prePrayerReminder: true,
+    prePrayerMinutes: 5,
+    playAzaan: true,
+    azaanVoice: 'makkah',
+    soundEnabled: true,
+    vibration: true,
     dailyQuran: true,
     dailyDua: true,
     dailyHadith: true,
@@ -98,9 +117,14 @@ export const storageService = {
     try {
       const stored = localStorage.getItem(GUEST_STORAGE_KEY);
       if (stored) {
+        const parsed = JSON.parse(stored);
         return {
           ...DEFAULT_GUEST_PROFILE,
-          ...JSON.parse(stored),
+          ...parsed,
+          notifications: {
+            ...DEFAULT_GUEST_PROFILE.notifications,
+            ...(parsed.notifications || {}),
+          },
           isGuest: true,
           id: 'guest_default',
         };
@@ -120,6 +144,10 @@ export const storageService = {
         return {
           ...DEFAULT_GUEST_PROFILE,
           ...parsed,
+          notifications: {
+            ...DEFAULT_GUEST_PROFILE.notifications,
+            ...(parsed.notifications || {}),
+          },
           id: uid,
           isGuest: false,
         };

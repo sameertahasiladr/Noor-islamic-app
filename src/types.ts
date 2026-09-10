@@ -46,6 +46,12 @@ export interface UserProfile {
     asr: boolean;
     maghrib: boolean;
     isha: boolean;
+    prePrayerReminder?: boolean; // 5-minute pre-prayer warning
+    prePrayerMinutes?: number; // default 5 minutes
+    playAzaan?: boolean; // Call to prayer audio playback
+    azaanVoice?: 'makkah' | 'madinah' | 'alafasy' | 'alaqsa' | 'abdulbasit';
+    soundEnabled?: boolean;
+    vibration?: boolean;
     dailyQuran?: boolean;
     dailyDua?: boolean;
     dailyHadith?: boolean;
@@ -298,4 +304,20 @@ export interface ZakatCalculation {
   netWealth: number;
   zakatDue: number;
   isEligible: boolean;
+}
+
+export interface AzaanPlaybackState {
+  isPlaying: boolean;
+  prayerName?: 'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha' | string;
+  voiceName: string;
+  audioUrl?: string;
+  duration?: number;
+  currentTime?: number;
+}
+
+export interface PrePrayerAlertEvent {
+  prayerName: 'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha';
+  minutesRemaining: number;
+  prayerTime: string;
+  timestamp: number;
 }

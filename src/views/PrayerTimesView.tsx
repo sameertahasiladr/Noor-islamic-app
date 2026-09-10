@@ -286,43 +286,43 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
   return (
     <div className="max-w-4xl mx-auto px-4 pb-20 pt-2 space-y-4">
       {/* Sub-tabs */}
-      <div className="flex items-center space-x-1 p-1 bg-zinc-200/60 dark:bg-zinc-800/80 rounded-xl max-w-md mx-auto">
+      <div className="flex items-center space-x-1 p-1 bg-[#ECE7DE] dark:bg-[#0A1A13] border border-[#E0DBD0] dark:border-emerald-950/80 rounded-2xl max-w-md mx-auto">
         <button
           onClick={() => setActiveSubTab('today')}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all ${
             activeSubTab === 'today'
-              ? 'bg-white dark:bg-zinc-900 text-emerald-800 dark:text-emerald-400 shadow-sm'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+              ? 'bg-emerald-800 text-white dark:bg-emerald-950 dark:text-amber-300 shadow-xs border border-emerald-700/40'
+              : 'text-[#5C6F66] dark:text-[#9EB2A7] hover:text-[#14241D] dark:hover:text-[#F4F3EC]'
           }`}
         >
           Daily Schedule
         </button>
         <button
           onClick={() => setActiveSubTab('monthly')}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all ${
             activeSubTab === 'monthly'
-              ? 'bg-white dark:bg-zinc-900 text-emerald-800 dark:text-emerald-400 shadow-sm'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+              ? 'bg-emerald-800 text-white dark:bg-emerald-950 dark:text-amber-300 shadow-xs border border-emerald-700/40'
+              : 'text-[#5C6F66] dark:text-[#9EB2A7] hover:text-[#14241D] dark:hover:text-[#F4F3EC]'
           }`}
         >
           Weekly Timetable
         </button>
         <button
           onClick={() => setActiveSubTab('qada')}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all ${
             activeSubTab === 'qada'
-              ? 'bg-white dark:bg-zinc-900 text-emerald-800 dark:text-emerald-400 shadow-sm'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+              ? 'bg-emerald-800 text-white dark:bg-emerald-950 dark:text-amber-300 shadow-xs border border-emerald-700/40'
+              : 'text-[#5C6F66] dark:text-[#9EB2A7] hover:text-[#14241D] dark:hover:text-[#F4F3EC]'
           }`}
         >
           Qada Tracker
         </button>
         <button
           onClick={() => setActiveSubTab('settings')}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+          className={`flex-1 py-1.5 text-xs font-bold rounded-xl transition-all ${
             activeSubTab === 'settings'
-              ? 'bg-white dark:bg-zinc-900 text-emerald-800 dark:text-emerald-400 shadow-sm'
-              : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+              ? 'bg-emerald-800 text-white dark:bg-emerald-950 dark:text-amber-300 shadow-xs border border-emerald-700/40'
+              : 'text-[#5C6F66] dark:text-[#9EB2A7] hover:text-[#14241D] dark:hover:text-[#F4F3EC]'
           }`}
         >
           Calibration
@@ -331,14 +331,14 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
 
       {locationStatusMsg && (
         <div
-          className={`p-3 rounded-xl text-xs font-semibold flex items-center gap-2 animate-in fade-in ${
+          className={`p-3 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in border ${
             locationStatusMsg.type === 'success'
-              ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200'
-              : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-200'
+              ? 'bg-emerald-100/90 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200 border-emerald-300 dark:border-emerald-800'
+              : 'bg-rose-100/90 dark:bg-rose-950 text-rose-900 dark:text-rose-200 border-rose-300 dark:border-rose-800'
           }`}
         >
           {locationStatusMsg.type === 'success' ? (
-            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <Check className="w-4 h-4 text-emerald-700 shrink-0" />
           ) : (
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           )}
@@ -350,16 +350,16 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
       {activeSubTab === 'today' && (
         <div className="space-y-4">
           {/* Location & method bar */}
-          <div className="p-4 rounded-2xl bg-white dark:bg-zinc-850 border border-zinc-200/80 dark:border-zinc-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-3xl bg-white dark:bg-[#0D1E17] border border-[#E8E4DC] dark:border-emerald-900/30 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center justify-center shrink-0">
-                <MapPin className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-2xl bg-emerald-800/10 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center shrink-0 border border-emerald-700/20">
+                <MapPin className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                <h3 className="text-sm font-bold text-[#14241D] dark:text-[#F4F3EC]">
                   {profile.location.city}, {profile.location.country}
                 </h3>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs text-[#5C6F66] dark:text-[#9EB2A7] font-medium">
                   GPS: {profile.location.latitude.toFixed(4)}°, {profile.location.longitude.toFixed(4)}° • {profile.prayerCalculationMethod}
                 </p>
               </div>
@@ -369,15 +369,15 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
               <button
                 onClick={handleDetectLocation}
                 disabled={isDetectingLocation}
-                className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-zinc-800 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 rounded-xl bg-emerald-800/10 dark:bg-emerald-950/80 hover:bg-emerald-800/20 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50 border border-emerald-700/20"
                 title="Acquire exact GPS coordinates from browser"
               >
-                <Globe className={`w-3.5 h-3.5 ${isDetectingLocation ? 'animate-spin text-emerald-600' : ''}`} />
+                <Globe className={`w-3.5 h-3.5 ${isDetectingLocation ? 'animate-spin text-emerald-700' : ''}`} />
                 <span>{isDetectingLocation ? 'Locating...' : 'Auto Detect GPS'}</span>
               </button>
               <button
                 onClick={() => setActiveSubTab('settings')}
-                className="px-3 py-1.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 text-zinc-700 dark:text-zinc-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                className="px-3 py-1.5 rounded-xl bg-[#F0EBE1] dark:bg-zinc-800 hover:bg-[#E5DFD4] text-[#14241D] dark:text-[#F4F3EC] text-xs font-bold flex items-center gap-1.5 transition-colors"
                 title="Calibrate coordinates and calculation"
               >
                 <Sliders className="w-3.5 h-3.5" />
@@ -387,25 +387,26 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
           </div>
 
           {/* Countdown Highlight Card */}
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-900 via-teal-900 to-zinc-900 text-white shadow-xl relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#063B2D] to-[#04281E] text-white shadow-xl shadow-emerald-950/20 border border-emerald-600/30 relative overflow-hidden">
             <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="text-xs uppercase font-bold tracking-wider text-emerald-300">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse mr-1.5" />
                   Next Obligatory Prayer
                 </span>
-                <h2 className="text-3xl font-extrabold mt-1 text-white flex items-center gap-3">
+                <h2 className="text-3xl font-extrabold mt-2 text-white flex items-center gap-3">
                   <span>{prayerData.nextPrayer.name}</span>
-                  <span className="text-lg font-normal text-emerald-200/90 font-mono">
+                  <span className="text-lg font-bold text-amber-300 font-mono">
                     {prayerData.nextPrayer.time}
                   </span>
                 </h2>
-                <p className="text-xs text-emerald-100/75 mt-1">
+                <p className="text-xs text-emerald-200/80 mt-1 font-medium">
                   {prayerData.hijriDate.formatted} • {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center shrink-0">
-                <span className="text-[11px] uppercase tracking-wider text-emerald-200 font-semibold block">
+              <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-xs border border-white/10 text-center shrink-0">
+                <span className="text-[10px] uppercase tracking-wider text-emerald-200 font-bold block">
                   Time Remaining
                 </span>
                 <span className="text-2xl font-black font-mono tracking-tight text-white block mt-0.5">
@@ -423,43 +424,43 @@ export const PrayerTimesView: React.FC<PrayerTimesViewProps> = ({
               return (
                 <div
                   key={p.key}
-                  className={`p-4 rounded-2xl border transition-all ${
+                  className={`p-4 rounded-3xl border transition-all ${
                     isNext
-                      ? 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/40 ring-2 ring-emerald-500/20 shadow-md'
-                      : 'border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-850 shadow-sm'
+                      ? 'border-amber-400/80 bg-amber-50/50 dark:bg-[#122820] ring-2 ring-amber-400/20 shadow-md'
+                      : 'border-[#E8E4DC] dark:border-emerald-900/30 bg-white dark:bg-[#0D1E17] shadow-xs'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                        className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
                           isNext
-                            ? 'bg-emerald-600 text-white shadow-sm'
-                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300'
+                            ? 'bg-amber-400 text-emerald-950 font-bold shadow-xs'
+                            : 'bg-emerald-800/10 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300'
                         }`}
                       >
-                        <Icon className="w-4 h-4" />
+                        <Icon className="w-5 h-5" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                          <h4 className="text-sm font-bold text-[#14241D] dark:text-[#F4F3EC]">
                             {p.name}
                           </h4>
                           {isNext && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-600 text-white">
-                              NEXT
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400 text-emerald-950 uppercase">
+                              Upcoming
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-zinc-400 font-arabic">{p.arabic}</p>
+                        <p className="text-xs text-[#5C6F66] dark:text-[#9EB2A7] font-arabic">{p.arabic}</p>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-base font-extrabold font-mono text-zinc-900 dark:text-zinc-100">
+                      <span className={`text-base font-extrabold font-mono ${isNext ? 'text-emerald-800 dark:text-amber-300' : 'text-[#14241D] dark:text-[#F4F3EC]'}`}>
                         {p.time}
                       </span>
-                      <p className="text-[10px] text-zinc-400 block">{p.rakat}</p>
+                      <p className="text-[10px] text-[#5C6F66] dark:text-[#9EB2A7] block mt-0.5">{p.rakat}</p>
                     </div>
                   </div>
                 </div>

@@ -33,14 +33,32 @@ export const POPULAR_LOCATIONS: LocationPreset[] = [
   { city: 'Istanbul', country: 'Turkey', latitude: 41.0082, longitude: 28.9784 },
   { city: 'Ankara', country: 'Turkey', latitude: 39.9334, longitude: 32.8597 },
   { city: 'Tashkent', country: 'Uzbekistan', latitude: 41.2995, longitude: 69.2401 },
-  // South Asia
+  // South Asia (India, Pakistan, Bangladesh)
+  { city: 'Mumbai', country: 'India', latitude: 19.0760, longitude: 72.8777 },
+  { city: 'Delhi', country: 'India', latitude: 28.6139, longitude: 77.2090 },
+  { city: 'Bengaluru', country: 'India', latitude: 12.9716, longitude: 77.5946 },
+  { city: 'Hyderabad', country: 'India', latitude: 17.3850, longitude: 78.4867 },
+  { city: 'Kolkata', country: 'India', latitude: 22.5726, longitude: 88.3639 },
+  { city: 'Chennai', country: 'India', latitude: 13.0827, longitude: 80.2707 },
+  { city: 'Ahmedabad', country: 'India', latitude: 23.0225, longitude: 72.5714 },
+  { city: 'Pune', country: 'India', latitude: 18.5204, longitude: 73.8567 },
+  { city: 'Surat', country: 'India', latitude: 21.1702, longitude: 72.8311 },
+  { city: 'Lucknow', country: 'India', latitude: 26.8467, longitude: 80.9462 },
+  { city: 'Jaipur', country: 'India', latitude: 26.9124, longitude: 75.7873 },
+  { city: 'Srinagar', country: 'India', latitude: 34.0837, longitude: 74.7973 },
+  { city: 'Kozhikode (Calicut)', country: 'India', latitude: 11.2588, longitude: 75.7804 },
+  { city: 'Kochi (Cochin)', country: 'India', latitude: 9.9312, longitude: 76.2673 },
+  { city: 'Bhopal', country: 'India', latitude: 23.2599, longitude: 77.4126 },
+  { city: 'Patna', country: 'India', latitude: 25.5941, longitude: 85.1376 },
+  { city: 'Nagpur', country: 'India', latitude: 21.1458, longitude: 79.0882 },
+  { city: 'Indore', country: 'India', latitude: 22.7196, longitude: 75.8577 },
+  { city: 'Chandigarh', country: 'India', latitude: 30.7333, longitude: 76.7794 },
+  { city: 'Guwahati', country: 'India', latitude: 26.1445, longitude: 91.7362 },
+  { city: 'Varanasi', country: 'India', latitude: 25.3176, longitude: 82.9739 },
+  { city: 'Agra', country: 'India', latitude: 27.1767, longitude: 78.0081 },
   { city: 'Karachi', country: 'Pakistan', latitude: 24.8607, longitude: 67.0011 },
   { city: 'Lahore', country: 'Pakistan', latitude: 31.5204, longitude: 74.3587 },
   { city: 'Islamabad', country: 'Pakistan', latitude: 33.6844, longitude: 73.0479 },
-  { city: 'Mumbai', country: 'India', latitude: 19.0760, longitude: 72.8777 },
-  { city: 'Delhi', country: 'India', latitude: 28.6139, longitude: 77.2090 },
-  { city: 'Hyderabad', country: 'India', latitude: 17.3850, longitude: 78.4867 },
-  { city: 'Bengaluru', country: 'India', latitude: 12.9716, longitude: 77.5946 },
   { city: 'Dhaka', country: 'Bangladesh', latitude: 23.8103, longitude: 90.4125 },
   // Southeast & East Asia
   { city: 'Jakarta', country: 'Indonesia', latitude: -6.2088, longitude: 106.8456 },
@@ -407,10 +425,30 @@ export function calculatePrayerTimes(
   const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
   const remainingFormatted = `${pad(hoursLeft)}:${pad(minutesLeft)}:${pad(secsLeft)}`;
 
+  const createPrayerDate = (decimal: number): Date => {
+    const d = new Date(date);
+    const normalized = ((decimal % 24) + 24) % 24;
+    const h = Math.floor(normalized);
+    const m = Math.floor((normalized - h) * 60);
+    const s = Math.floor((((normalized - h) * 60) - m) * 60);
+    d.setHours(h, m, s, 0);
+    return d;
+  };
+
+  const prayerDates = {
+    fajr: createPrayerDate(fajrTime),
+    sunrise: createPrayerDate(sunriseTime),
+    dhuhr: createPrayerDate(dhuhrTime),
+    asr: createPrayerDate(asrTime),
+    maghrib: createPrayerDate(maghribTime),
+    isha: createPrayerDate(ishaTime),
+  };
+
   return {
     ...times,
     date,
     hijriDate: getHijriDate(date, hijriAdjustment),
+    prayerDates,
     nextPrayer: {
       name: nextName,
       time: nextDisplay,
@@ -418,6 +456,80 @@ export function calculatePrayerTimes(
       totalSecondsRemaining: secondsRemaining,
     },
   };
+}
+
+export interface ScheduledPrayerTime {
+  name: 'Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha';
+  arabicName: string;
+  timeDisplay: string;
+  exactDate: Date;
+  preReminderDate: Date;
+}
+
+/**
+ * Generates exact ScheduledPrayerTimes for a day with pre-prayer warning time (default 5 min before)
+ */
+export function calculatePrayerScheduleDates(
+  date: Date,
+  lat: number,
+  lng: number,
+  methodId: CalculationMethod = 'MWL',
+  asrMethod: 'standard' | 'hanafi' = 'standard',
+  hijriAdjustment: number = 0,
+  offsets?: {
+    fajr?: number;
+    sunrise?: number;
+    dhuhr?: number;
+    asr?: number;
+    maghrib?: number;
+    isha?: number;
+  },
+  highLatitudeRule: 'middleOfTheNight' | 'oneSeventh' | 'angleBased' | 'none' = 'angleBased',
+  preReminderMinutes: number = 5
+): ScheduledPrayerTime[] {
+  const timesData = calculatePrayerTimes(
+    date,
+    lat,
+    lng,
+    methodId,
+    asrMethod,
+    hijriAdjustment,
+    offsets,
+    highLatitudeRule
+  );
+
+  const arabicNames: Record<string, string> = {
+    Fajr: 'الفجر',
+    Sunrise: 'الشروق',
+    Dhuhr: 'الظهر',
+    Asr: 'العصر',
+    Maghrib: 'المغرب',
+    Isha: 'العشاء',
+  };
+
+  const prayers: ('Fajr' | 'Sunrise' | 'Dhuhr' | 'Asr' | 'Maghrib' | 'Isha')[] = [
+    'Fajr',
+    'Sunrise',
+    'Dhuhr',
+    'Asr',
+    'Maghrib',
+    'Isha',
+  ];
+
+  return prayers.map((pName) => {
+    const key = pName.toLowerCase() as 'fajr' | 'sunrise' | 'dhuhr' | 'asr' | 'maghrib' | 'isha';
+    const timeDisplay = timesData[key];
+    const exactDate = (timesData as unknown as { prayerDates: Record<string, Date> }).prayerDates[key];
+    const preReminderDate = new Date(exactDate.getTime() - preReminderMinutes * 60 * 1000);
+
+    return {
+      name: pName,
+      arabicName: arabicNames[pName] || pName,
+      timeDisplay,
+      exactDate,
+      preReminderDate,
+    };
+  });
 }
 
 /**

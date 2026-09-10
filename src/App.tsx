@@ -22,6 +22,8 @@ import { audioService, ActiveQuranPlayback } from './services/audioService';
 import { Mic, Check, MapPin } from 'lucide-react';
 import { autoDetectAndApplyLocation, subscribeToLocationDetection } from './services/locationService';
 import { initNativeAndroid } from './services/nativeService';
+import { notificationService } from './services/notificationService';
+import { AdhanAlertOverlay } from './components/AdhanAlertOverlay';
 
 // Views
 import { HomeView } from './views/HomeView';
@@ -99,6 +101,23 @@ export default function App() {
       return false; // Exit app
     });
   }, [isDark, isSearchOpen, isAuthOpen, isVoiceNavOpen, activeExploreFeature, activeTab]);
+
+  // Synchronize 5-minute pre-prayer alerts & Azaan notification schedule with OS and background watcher
+  useEffect(() => {
+    notificationService.schedulePrayerAlerts(profile).catch((err) => {
+      console.warn('[App] Prayer alerts schedule note:', err);
+    });
+  }, [
+    profile.location.latitude,
+    profile.location.longitude,
+    profile.location.city,
+    profile.prayerCalculationMethod,
+    profile.asrMethod,
+    profile.hijriDateAdjustment,
+    profile.prayerTimeOffsets,
+    profile.highLatitudeRule,
+    profile.notifications,
+  ]);
 
   // Handle centralized profile update (both local and Firestore)
   const handleUpdateProfile = useCallback((updated: UserProfile) => {
@@ -281,7 +300,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-100 flex flex-col transition-colors duration-200">
+    <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#07130E] text-[#14241D] dark:text-[#F4F3EC] flex flex-col transition-colors duration-200 selection:bg-emerald-700 selection:text-white">
       {/* Top sticky Header */}
       <Header
         profile={profile}
@@ -526,6 +545,9 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* 5-Min Pre-Prayer Alert Banner & Active Adhan Call-to-Prayer Floating Card */}
+      <AdhanAlertOverlay />
     </div>
   );
 }

@@ -213,7 +213,7 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="flex items-center text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 transition-colors"
+          className="flex items-center text-xs font-bold text-emerald-800 dark:text-amber-300 hover:text-emerald-900 transition-colors py-1 px-2 rounded-xl hover:bg-emerald-800/10"
         >
           <ChevronLeft className="w-4 h-4 mr-0.5" />
           <span>Back to Tools</span>
@@ -222,15 +222,17 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold shadow-sm transition-all"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold shadow-xs transition-all"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-amber-300" />
             <span>Add Custom Tasbih</span>
           </button>
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className={`p-2 rounded-xl text-xs transition-colors ${
-              soundEnabled ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-zinc-800' : 'text-zinc-400'
+            className={`p-2 rounded-xl text-xs transition-colors border ${
+              soundEnabled
+                ? 'text-emerald-800 dark:text-amber-300 bg-emerald-800/10 dark:bg-emerald-950 border-emerald-700/20'
+                : 'text-[#5C6F66] border-[#E8E4DC] dark:border-emerald-900/30'
             }`}
             title={soundEnabled ? 'Sound On' : 'Sound Muted'}
           >
@@ -238,7 +240,7 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
           </button>
           <button
             onClick={() => setShowHistory(!showHistory)}
-            className="p-2 rounded-xl text-xs text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className="p-2 rounded-xl text-xs text-[#5C6F66] dark:text-[#9EB2A7] hover:bg-emerald-800/10 border border-[#E8E4DC] dark:border-emerald-900/30 transition-colors"
             title="Total Dhikr Statistics"
           >
             <History className="w-4 h-4" />
@@ -247,62 +249,62 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
       </div>
 
       {/* Main Tasbih Counter Card */}
-      <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-950 text-white shadow-2xl border border-emerald-700/50 text-center relative overflow-hidden">
+      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#064E3B] via-[#063B2D] to-[#04281E] text-white shadow-xl shadow-emerald-950/20 border border-emerald-600/30 text-center relative overflow-hidden">
         {/* Subtle decorative circles */}
-        <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
-        <div className="absolute -left-10 -bottom-10 w-44 h-44 rounded-full bg-teal-500/10 blur-2xl pointer-events-none" />
+        <div className="absolute -right-10 -top-10 w-44 h-44 rounded-full bg-amber-400/5 blur-2xl pointer-events-none" />
+        <div className="absolute -left-10 -bottom-10 w-44 h-44 rounded-full bg-emerald-400/10 blur-2xl pointer-events-none" />
 
         <div className="relative z-10 space-y-4">
           {/* Active Dhikr Info */}
           <div>
-            <span className="text-[11px] uppercase font-bold tracking-widest text-emerald-300">
-              Active Dhikr
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+              Active Remembrance
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold font-arabic my-1">
+            <h2 className="text-3xl sm:text-4xl font-bold font-arabic my-2 text-white">
               {selectedDhikr.arabic}
             </h2>
-            <p className="text-sm font-semibold text-emerald-100">
+            <p className="text-base font-bold text-emerald-100">
               {selectedDhikr.transliteration}
             </p>
-            <p className="text-xs text-emerald-200/80 max-w-md mx-auto mt-0.5">
+            <p className="text-xs text-emerald-200/80 max-w-md mx-auto mt-0.5 font-medium">
               "{selectedDhikr.translation}"
             </p>
           </div>
 
           {/* Big Interactive Counter Ring */}
-          <div className="py-3 flex justify-center">
+          <div className="py-4 flex justify-center">
             <button
               onClick={handleIncrement}
-              className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-white/10 hover:bg-white/15 active:scale-95 transition-all border-4 border-emerald-400/40 shadow-inner flex flex-col items-center justify-center cursor-pointer group select-none"
+              className="relative w-52 h-52 sm:w-60 sm:h-60 rounded-full bg-white/10 hover:bg-white/15 active:scale-95 transition-all border-4 border-emerald-500/30 shadow-inner flex flex-col items-center justify-center cursor-pointer group select-none"
             >
               {/* Progress Ring Visual */}
               <div
-                className="absolute inset-0 rounded-full border-4 border-amber-300 transition-all duration-150"
+                className="absolute inset-0 rounded-full border-4 border-amber-400 transition-all duration-150 shadow-[0_0_12px_#FBBF24]"
                 style={{
                   clipPath: `inset(${100 - progressPercent}% 0 0 0)`,
                 }}
               />
 
-              <span className="text-5xl sm:text-6xl font-black font-mono tracking-tighter text-white drop-shadow-md group-hover:scale-105 transition-transform">
+              <span className="text-6xl sm:text-7xl font-black font-mono tracking-tighter text-white drop-shadow-md group-hover:scale-105 transition-transform">
                 {count}
               </span>
-              <span className="text-xs font-semibold text-emerald-200 mt-1">
+              <span className="text-xs font-bold text-amber-300 mt-1">
                 {target > 0 ? `Target: ${target}` : 'Free Count'}
               </span>
-              <span className="text-[11px] text-emerald-300/80 mt-1 uppercase tracking-wider">
+              <span className="text-[10px] text-emerald-200/90 mt-1 uppercase font-bold tracking-wider">
                 Tap anywhere to count
               </span>
             </button>
           </div>
 
           {/* Session Progress Stats */}
-          <div className="flex items-center justify-center gap-4 text-xs text-emerald-200 pt-1">
+          <div className="flex items-center justify-center gap-4 text-xs text-emerald-200/90 pt-1 font-medium">
             <div>
-              Completed Cycles: <strong className="text-white font-bold">{cycles}</strong>
+              Cycles: <strong className="text-white font-bold">{cycles}</strong>
             </div>
             <div>•</div>
             <div>
-              Total Session: <strong className="text-white font-bold">{count + cycles * target}</strong>
+              Session Total: <strong className="text-white font-bold">{count + cycles * target}</strong>
             </div>
             <div>•</div>
             <button
@@ -317,8 +319,8 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
       </div>
 
       {/* Target selector */}
-      <div className="p-4 bg-white dark:bg-zinc-850 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 shadow-sm flex items-center justify-between">
-        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+      <div className="p-4 bg-white dark:bg-[#0D1E17] rounded-3xl border border-[#E8E4DC] dark:border-emerald-900/30 shadow-xs flex items-center justify-between">
+        <span className="text-xs font-bold text-[#14241D] dark:text-[#F4F3EC]">
           Target Count:
         </span>
         <div className="flex items-center space-x-1.5">
@@ -326,10 +328,10 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
             <button
               key={t}
               onClick={() => setTarget(t)}
-              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 target === t
-                  ? 'bg-emerald-700 text-white shadow'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200'
+                  ? 'bg-emerald-800 text-white dark:bg-emerald-950 dark:text-amber-300 shadow-xs border border-emerald-700/40'
+                  : 'bg-[#F0EBE1] dark:bg-zinc-800 text-[#5C6F66] dark:text-[#9EB2A7] hover:bg-[#E5DFD4]'
               }`}
             >
               {t === 0 ? 'Free (∞)' : t}
@@ -342,47 +344,47 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
       {customDhikrs.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between px-1">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-400">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-amber-300">
               Your Custom Tasbihs ({customDhikrs.length})
             </h3>
-            <span className="text-[11px] text-zinc-400">Saved to your profile</span>
+            <span className="text-[11px] text-[#5C6F66] font-medium">Saved to your profile</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {customDhikrs.map((d) => {
               const isCurrent = selectedDhikr.id === d.id;
               return (
                 <div
                   key={d.id}
                   onClick={() => handleSelectDhikr(d)}
-                  className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer relative group ${
+                  className={`p-4 rounded-3xl border text-left transition-all cursor-pointer relative group ${
                     isCurrent
-                      ? 'border-emerald-600 bg-emerald-50/60 dark:bg-emerald-950/40 shadow-sm'
-                      : 'border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-850 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                      ? 'border-amber-400 bg-amber-50/50 dark:bg-[#122820] shadow-sm ring-2 ring-amber-400/20'
+                      : 'border-[#E8E4DC] dark:border-emerald-900/30 bg-white dark:bg-[#0D1E17] hover:bg-emerald-900/5 dark:hover:bg-emerald-950/40'
                   }`}
                 >
                   <div className="flex items-start justify-between">
-                    <span className="text-base font-arabic font-bold text-emerald-800 dark:text-emerald-400">
+                    <span className="text-lg font-arabic font-bold text-emerald-800 dark:text-emerald-300">
                       {d.arabic}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      {isCurrent && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                      {isCurrent && <Check className="w-4 h-4 text-emerald-700 shrink-0" />}
                       <button
                         onClick={(e) => handleDeleteCustomDhikr(d.id, e)}
-                        className="p-1 rounded-lg text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="p-1 rounded-lg text-[#5C6F66] hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Delete custom tasbih"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
-                  <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 mt-1">
+                  <p className="text-sm font-bold text-[#14241D] dark:text-[#F4F3EC] mt-1">
                     {d.transliteration}
                   </p>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  <p className="text-xs text-[#5C6F66] dark:text-[#9EB2A7] font-medium">
                     {d.translation}
                   </p>
-                  <div className="mt-2 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md inline-block">
+                  <div className="mt-2 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-800/10 dark:bg-emerald-950 px-2 py-0.5 rounded-md inline-block border border-emerald-700/20">
                     Target: {d.target} counts
                   </div>
                 </div>
@@ -394,32 +396,32 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
 
       {/* Preset Dhikr Selection List */}
       <div className="space-y-2">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 px-1">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-[#5C6F66] dark:text-[#9EB2A7] px-1">
           Preset Remembrances (Sunnah Dhikr)
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {PRESET_DHIKR.map((d) => {
             const isCurrent = selectedDhikr.id === d.id;
             return (
               <button
                 key={d.id}
                 onClick={() => handleSelectDhikr(d)}
-                className={`p-3.5 rounded-2xl border text-left transition-all ${
+                className={`p-4 rounded-3xl border text-left transition-all ${
                   isCurrent
-                    ? 'border-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/30 shadow-sm'
-                    : 'border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-850 hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                    ? 'border-amber-400 bg-amber-50/50 dark:bg-[#122820] shadow-sm ring-2 ring-amber-400/20'
+                    : 'border-[#E8E4DC] dark:border-emerald-900/30 bg-white dark:bg-[#0D1E17] hover:bg-emerald-900/5 dark:hover:bg-emerald-950/40'
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <span className="text-base font-arabic font-bold text-emerald-800 dark:text-emerald-400">
+                  <span className="text-lg font-arabic font-bold text-emerald-800 dark:text-emerald-300">
                     {d.arabic}
                   </span>
-                  {isCurrent && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                  {isCurrent && <Check className="w-4 h-4 text-emerald-700 shrink-0" />}
                 </div>
-                <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 mt-1">
+                <p className="text-sm font-bold text-[#14241D] dark:text-[#F4F3EC] mt-1">
                   {d.transliteration}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="text-xs text-[#5C6F66] dark:text-[#9EB2A7] font-medium">
                   {d.translation}
                 </p>
               </button>
@@ -430,16 +432,16 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
 
       {/* Lifetime stats modal / panel */}
       {showHistory && (
-        <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-xs flex items-center justify-between animate-in fade-in">
+        <div className="p-4 bg-emerald-800/10 dark:bg-emerald-950/40 rounded-3xl border border-emerald-700/20 text-xs flex items-center justify-between animate-in fade-in">
           <div>
-            <p className="font-bold text-emerald-900 dark:text-emerald-300">
+            <p className="font-bold text-emerald-900 dark:text-emerald-200">
               Total Lifetime Tasbih Counts:
             </p>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-0.5">
+            <p className="text-[#5C6F66] dark:text-[#9EB2A7] mt-0.5 font-medium">
               Every praise recorded in your balance of good deeds in sha Allah.
             </p>
           </div>
-          <span className="text-2xl font-extrabold text-emerald-800 dark:text-emerald-300">
+          <span className="text-2xl font-extrabold text-emerald-800 dark:text-amber-300">
             {(profile.tasbihTotal || 0).toLocaleString()}
           </span>
         </div>
@@ -448,22 +450,22 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
       {/* Add Custom Tasbih Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-in fade-in">
-          <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="w-full max-w-md bg-white dark:bg-[#0D1E17] rounded-3xl shadow-2xl border border-[#E8E4DC] dark:border-emerald-900/30 overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8E4DC] dark:border-emerald-900/20">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-emerald-800/10 dark:bg-emerald-950 text-emerald-800 dark:text-amber-300 flex items-center justify-center border border-emerald-700/20">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                  <h3 className="text-sm font-bold text-[#14241D] dark:text-[#F4F3EC]">
                     Add Custom Tasbih
                   </h3>
-                  <p className="text-xs text-zinc-400">Add any personal supplication or dhikr</p>
+                  <p className="text-xs text-[#5C6F66] dark:text-[#9EB2A7]">Add any personal supplication or dhikr</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                className="p-1 rounded-xl text-[#5C6F66] hover:text-[#14241D] dark:hover:text-[#F4F3EC]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -471,7 +473,7 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
 
             <form onSubmit={handleCreateCustomDhikr} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                   Dhikr Name or Transliteration *
                 </label>
                 <input
@@ -480,12 +482,12 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
                   value={customName}
                   onChange={(e) => setCustomName(e.target.value)}
                   placeholder="e.g. Hasbunallahu wa ni'mal wakeel"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/30 bg-[#FAF8F5] dark:bg-[#14241D] text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                   Arabic Text (Optional)
                 </label>
                 <input
@@ -494,12 +496,12 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
                   value={customArabic}
                   onChange={(e) => setCustomArabic(e.target.value)}
                   placeholder="حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 font-arabic text-sm text-right focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/30 bg-[#FAF8F5] dark:bg-[#14241D] font-arabic text-sm text-right focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                   English Meaning / Intention
                 </label>
                 <input
@@ -507,12 +509,12 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
                   value={customMeaning}
                   onChange={(e) => setCustomMeaning(e.target.value)}
                   placeholder="e.g. Allah is sufficient for us"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:text-zinc-100"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-[#E8E4DC] dark:border-emerald-900/30 bg-[#FAF8F5] dark:bg-[#14241D] text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 dark:text-[#F4F3EC]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-1">
+                <label className="block text-xs font-bold text-[#14241D] dark:text-[#F4F3EC] mb-1">
                   Target Count
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -523,8 +525,8 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
                       onClick={() => setCustomTarget(num)}
                       className={`py-2 rounded-xl text-xs font-bold border transition-all ${
                         customTarget === num
-                          ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
-                          : 'border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                          ? 'border-emerald-700 bg-emerald-800/10 dark:bg-emerald-950 text-emerald-800 dark:text-amber-300'
+                          : 'border-[#E8E4DC] dark:border-emerald-900/30 bg-[#FAF8F5] dark:bg-[#14241D] text-[#5C6F66]'
                       }`}
                     >
                       {num}
@@ -537,15 +539,15 @@ export const TasbihView: React.FC<TasbihViewProps> = ({ profile, onBack, onUpdat
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#5C6F66] hover:bg-emerald-800/10"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white shadow-md transition-all flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-emerald-800 hover:bg-emerald-900 text-white shadow-xs transition-all flex items-center gap-1.5"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4 text-amber-300" />
                   <span>Save Tasbih</span>
                 </button>
               </div>
