@@ -23,7 +23,7 @@ class AudioService {
   private currentSpokenText: string | null = null;
 
   /**
-   * Generates Primary EveryAyah CDN URL for Mishary Alafasy
+   * Primary EveryAyah CDN URL for Mishary Alafasy
    */
   getAyahAudioUrl(surah: number, ayah: number): string {
     const sPad = String(surah).padStart(3, '0');
@@ -78,10 +78,17 @@ class AudioService {
     onEnded?: () => void,
     onError?: (err: unknown) => void
   ): HTMLAudioElement {
+    // 1. Stop any active audio (Quran or TTS) to guarantee only 1 active audio instance
     this.stop();
 
     const primaryUrl = this.getAyahAudioUrl(surah, ayah);
-    const audio = new Audio(primaryUrl);
+    console.log(`[AudioService] Playing Quran audio Surah ${surah}:${ayah} from URL: ${primaryUrl}`);
+
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.volume = 1.0;
+    audio.src = primaryUrl;
+
     this.currentAudio = audio;
     this.currentAyahKey = `${surah}:${ayah}`;
     this.onEndCallback = onEnded || null;
@@ -97,7 +104,16 @@ class AudioService {
     };
     this.notifyPlayback();
 
+    audio.onloadeddata = () => {
+      console.log(`[AudioService] Quran audio loadeddata for ${surah}:${ayah}`);
+    };
+
+    audio.oncanplay = () => {
+      console.log(`[AudioService] Quran audio canplay for ${surah}:${ayah}`);
+    };
+
     audio.onended = () => {
+      console.log(`[AudioService] Quran audio ended for ${surah}:${ayah}`);
       this.currentAyahKey = null;
       if (this.onEndCallback) {
         this.onEndCallback();
@@ -108,13 +124,16 @@ class AudioService {
     };
 
     audio.onerror = (e) => {
-      // Try backup CDN if primary fails
-      console.warn('Primary EveryAyah CDN failed, trying backup Quran.com CDN...');
+      console.warn(`[AudioService] Primary CDN failed for ${surah}:${ayah}, trying backup Quran.com CDN...`, e);
       const backupUrl = this.getBackupAyahAudioUrl(surah, ayah);
-      const backupAudio = new Audio(backupUrl);
+      const backupAudio = new Audio();
+      backupAudio.preload = 'auto';
+      backupAudio.volume = 1.0;
+      backupAudio.src = backupUrl;
       this.currentAudio = backupAudio;
 
       backupAudio.onended = () => {
+        console.log(`[AudioService] Backup Quran audio ended for ${surah}:${ayah}`);
         this.currentAyahKey = null;
         if (this.onEndCallback) {
           this.onEndCallback();
@@ -125,23 +144,27 @@ class AudioService {
       };
 
       backupAudio.onerror = (backupErr) => {
-        console.error('All Quran audio sources failed:', backupErr);
+        console.error(`[AudioService] All Quran audio CDNs failed for ${surah}:${ayah}:`, backupErr);
         this.currentAyahKey = null;
         this.activePlayback = null;
         this.notifyPlayback();
         if (onError) onError(backupErr);
       };
 
-      backupAudio.play().catch((playErr) => {
+      backupAudio.play().then(() => {
+        console.log(`[AudioService] Backup Quran audio playback started for ${surah}:${ayah}`);
+      }).catch((playErr) => {
+        console.error(`[AudioService] Backup Quran audio play() failed for ${surah}:${ayah}:`, playErr);
         this.activePlayback = null;
         this.notifyPlayback();
         if (onError) onError(playErr);
       });
     };
 
-    audio.play().catch((err) => {
-      console.warn('Playback initiation note:', err);
-      // If user interaction was needed or error occurred
+    audio.play().then(() => {
+      console.log(`[AudioService] Quran audio play() resolved for ${surah}:${ayah}`);
+    }).catch((err) => {
+      console.error(`[AudioService] Quran audio play() rejected for ${surah}:${ayah}:`, err);
       if (onError) onError(err);
     });
 
@@ -150,8 +173,12 @@ class AudioService {
 
   stop(): void {
     if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio.currentTime = 0;
+      try {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      } catch (err) {
+        console.warn('[AudioService] Error pausing currentAudio:', err);
+      }
       this.currentAudio = null;
     }
     this.currentAyahKey = null;
@@ -163,7 +190,11 @@ class AudioService {
 
   pause(): void {
     if (this.currentAudio) {
-      this.currentAudio.pause();
+      try {
+        this.currentAudio.pause();
+      } catch (err) {
+        console.warn('[AudioService] Error pausing audio:', err);
+      }
       if (this.activePlayback) {
         this.activePlayback.isPaused = true;
         this.notifyPlayback();
@@ -173,7 +204,11 @@ class AudioService {
 
   resume(): void {
     if (this.currentAudio) {
-      this.currentAudio.play().catch(() => {});
+      this.currentAudio.play().then(() => {
+        console.log('[AudioService] Quran audio resumed');
+      }).catch((err) => {
+        console.error('[AudioService] Resume Quran audio failed:', err);
+      });
       if (this.activePlayback) {
         this.activePlayback.isPaused = false;
         this.notifyPlayback();
@@ -197,16 +232,16 @@ class AudioService {
       try {
         this.textSpeechAudio.pause();
         this.textSpeechAudio.currentTime = 0;
-      } catch {
-        // ignore
+      } catch (err) {
+        console.warn('[AudioService] Error pausing textSpeechAudio:', err);
       }
       this.textSpeechAudio = null;
     }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
-      } catch {
-        // ignore
+      } catch (err) {
+        console.warn('[AudioService] Error canceling speechSynthesis:', err);
       }
     }
     this.notifySpeaking(false, null);
@@ -216,15 +251,15 @@ class AudioService {
     if (this.textSpeechAudio && !this.textSpeechAudio.paused) {
       try {
         this.textSpeechAudio.pause();
-      } catch {
-        // ignore
+      } catch (err) {
+        console.warn('[AudioService] Error pausing textSpeechAudio:', err);
       }
     }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.pause();
-      } catch {
-        // ignore
+      } catch (err) {
+        console.warn('[AudioService] Error pausing speechSynthesis:', err);
       }
     }
   }
@@ -232,66 +267,96 @@ class AudioService {
   resumeSpeakingArabic(): void {
     if (this.textSpeechAudio && this.textSpeechAudio.paused) {
       try {
-        this.textSpeechAudio.play().catch(() => {});
-      } catch {
-        // ignore
+        this.textSpeechAudio.play().catch((err) => {
+          console.error('[AudioService] Resume textSpeechAudio failed:', err);
+        });
+      } catch (err) {
+        console.warn('[AudioService] Error resuming textSpeechAudio:', err);
       }
     }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.resume();
-      } catch {
-        // ignore
+      } catch (err) {
+        console.warn('[AudioService] Error resuming speechSynthesis:', err);
       }
     }
   }
 
   /**
    * Speaks Arabic text with reliable audio:
-   * 1. Google TTS high-fidelity pronunciation MP3 (works on all devices without Arabic OS voice packs)
-   * 2. Web Speech API fallback with automatic resume
-   * 3. Web Audio harmonic tone fallback
+   * Fetches TTS MP3 audio buffer directly into Blob URL to bypass WebView media element origin blocks
    */
-  speakArabicText(text: string, onFinish?: () => void): void {
-    this.stopSpeakingArabic();
-    this.notifySpeaking(true, text);
-
+  async speakArabicText(text: string, onFinish?: () => void): Promise<void> {
     const cleanText = text.trim();
+    console.log(`[AudioService] speakArabicText requested for: "${cleanText.slice(0, 30)}..."`);
+
+    // Toggle off if same text is currently playing
+    if (this.isSpeakingArabic && this.currentSpokenText === cleanText) {
+      console.log('[AudioService] Speaker tapped on active item -> stopping audio');
+      this.stopSpeakingArabic();
+      if (onFinish) onFinish();
+      return;
+    }
+
+    this.stopSpeakingArabic();
+
     if (!cleanText) {
       this.notifySpeaking(false, null);
       if (onFinish) onFinish();
       return;
     }
 
-    // Attempt online TTS audio stream
+    this.notifySpeaking(true, cleanText);
+
+    // Primary GTX TTS endpoint URL
+    const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=gtx&q=${encodeURIComponent(
+      cleanText.slice(0, 200)
+    )}`;
+    console.log(`[AudioService] Fetching Arabic audio buffer from: ${ttsUrl}`);
+
     try {
-      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ar&client=tw-ob&q=${encodeURIComponent(
-        cleanText.slice(0, 200)
-      )}`;
-      const audio = new Audio(ttsUrl);
+      // Fetch audio buffer directly via fetch()
+      const response = await fetch(ttsUrl);
+      if (!response.ok) {
+        throw new Error(`TTS fetch HTTP ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      console.log(`[AudioService] Created Blob URL: ${blobUrl}`);
+
+      const audio = new Audio(blobUrl);
+      audio.preload = 'auto';
+      audio.volume = 1.0;
       this.textSpeechAudio = audio;
 
       audio.onended = () => {
+        console.log('[AudioService] Speaker blob audio ended');
+        URL.revokeObjectURL(blobUrl);
         this.textSpeechAudio = null;
         this.notifySpeaking(false, null);
         if (onFinish) onFinish();
       };
 
-      audio.onerror = () => {
+      audio.onerror = (e) => {
+        console.warn('[AudioService] Blob audio error event, executing Web Speech fallback:', e);
+        URL.revokeObjectURL(blobUrl);
         this.textSpeechAudio = null;
         this.fallbackSpeechSynthesis(cleanText, onFinish);
       };
 
-      audio.play().catch(() => {
-        this.textSpeechAudio = null;
-        this.fallbackSpeechSynthesis(cleanText, onFinish);
-      });
-    } catch {
+      await audio.play();
+      console.log('[AudioService] Arabic speaker blob audio play() started successfully.');
+    } catch (err) {
+      console.warn('[AudioService] speakArabicText blob fetch/play failed, executing SpeechSynthesis fallback:', err);
+      this.textSpeechAudio = null;
       this.fallbackSpeechSynthesis(cleanText, onFinish);
     }
   }
 
   private fallbackSpeechSynthesis(text: string, onFinish?: () => void): void {
+    console.log('[AudioService] Executing SpeechSynthesis fallback for text');
     if ('speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
@@ -301,28 +366,44 @@ class AudioService {
         utterance.lang = 'ar-SA';
         utterance.rate = 0.85;
 
-        // Try selecting Arabic voice if available
         const voices = window.speechSynthesis.getVoices() || [];
-        const arVoice = voices.find((v) => v.lang.startsWith('ar'));
+        const arVoice = voices.find((v) => v.lang.startsWith('ar') || v.lang.includes('AR'));
         if (arVoice) {
           utterance.voice = arVoice;
+          console.log('[AudioService] Selected Arabic voice:', arVoice.name);
         }
 
-        utterance.onend = () => {
-          this.notifySpeaking(false, null);
-          if (onFinish) onFinish();
+        let isDone = false;
+        const cleanup = () => {
+          if (!isDone) {
+            isDone = true;
+            this.notifySpeaking(false, null);
+            if (onFinish) onFinish();
+          }
         };
 
-        utterance.onerror = () => {
+        const safetyTimeout = setTimeout(() => {
+          console.warn('[AudioService] SpeechSynthesis safety timeout reached, cleaning up state');
+          cleanup();
+        }, Math.max(3000, text.length * 120));
+
+        utterance.onend = () => {
+          console.log('[AudioService] SpeechSynthesis utterance ended');
+          clearTimeout(safetyTimeout);
+          cleanup();
+        };
+
+        utterance.onerror = (err) => {
+          console.warn('[AudioService] SpeechSynthesis utterance error:', err);
+          clearTimeout(safetyTimeout);
           this.playHarmonicTone();
-          this.notifySpeaking(false, null);
-          if (onFinish) onFinish();
+          cleanup();
         };
 
         window.speechSynthesis.speak(utterance);
         return;
-      } catch {
-        // continue to harmonic tone
+      } catch (err) {
+        console.warn('[AudioService] SpeechSynthesis execution error:', err);
       }
     }
 
@@ -335,6 +416,7 @@ class AudioService {
    * Gentle harmonic tone ensures audio feedback is audible even without sound files
    */
   private playHarmonicTone(): void {
+    console.log('[AudioService] Playing harmonic tone fallback');
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return;
@@ -349,8 +431,8 @@ class AudioService {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.6);
-    } catch {
-      // ignore
+    } catch (err) {
+      console.warn('[AudioService] Harmonic tone error:', err);
     }
   }
 }

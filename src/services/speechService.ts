@@ -99,7 +99,7 @@ class SpeechService {
   }
 
   public getArabicVoices(): SpeechSynthesisVoice[] {
-    if (!this.voicesLoaded) this.initVoices();
+    this.initVoices();
     return this.arabicVoices;
   }
 
@@ -241,67 +241,19 @@ class SpeechService {
       return;
     }
 
-    // If no Arabic TTS voice is installed in browser/OS, use dependable audio stream
-    if (this.arabicVoices.length === 0) {
-      this.activeUtterance = null;
-      audioService.speakArabicText(dua.arabic, () => {
-        if (mode === 'both') {
-          setTimeout(() => {
-            if (this.currentStatus.isPlaying && this.currentStatus.currentDuaId === dua.id) {
-              speakTranslation();
-            }
-          }, 400);
-        } else {
-          this.stopRecitation();
-        }
-      });
-      return;
-    }
-
-    // Speak Arabic text using Web Speech API
-    const utterAr = new SpeechSynthesisUtterance(dua.arabic);
-    utterAr.lang = 'ar-SA';
-    // Deliberate measured rate for tajweed clarity & harakat
-    utterAr.rate = rate;
-    utterAr.pitch = 1.0;
-
-    const preferred =
-      this.arabicVoices.find((v) => v.lang === 'ar-SA' || v.name.includes('Saudi')) ||
-      this.arabicVoices[0];
-    if (preferred) utterAr.voice = preferred;
-
-    utterAr.onend = () => {
+    // Play Arabic recitation via reliable AudioService stream (works on Android Capacitor WebView)
+    this.activeUtterance = null;
+    audioService.speakArabicText(dua.arabic, () => {
       if (mode === 'both') {
-        // Small pause between Arabic recitation and English translation
         setTimeout(() => {
           if (this.currentStatus.isPlaying && this.currentStatus.currentDuaId === dua.id) {
             speakTranslation();
           }
-        }, 600);
+        }, 400);
       } else {
         this.stopRecitation();
       }
-    };
-
-    utterAr.onerror = (e) => {
-      if (e.error !== 'canceled' && e.error !== 'interrupted') {
-        console.warn('Speech synthesis error on Arabic, using audio fallback:', e);
-        // Fallback to audio stream
-        audioService.speakArabicText(dua.arabic, () => {
-          if (mode === 'both') {
-            speakTranslation();
-          } else {
-            this.stopRecitation();
-          }
-        });
-        return;
-      }
-      this.stopRecitation();
-    };
-
-    this.activeUtterance = utterAr;
-    window.speechSynthesis.resume();
-    window.speechSynthesis.speak(utterAr);
+    });
   }
 
   /**
